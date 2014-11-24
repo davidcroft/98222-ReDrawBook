@@ -8,28 +8,59 @@
 
 import UIKit
 
-class RecordItemViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, ItunesAPIControllerProtocol {
+class RecordItemViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet var RecordItemPageImg: UIImageView!
     @IBOutlet var RecordItemPageTitle: UILabel!
     @IBOutlet var RecordItemPageDesp: UILabel!
     @IBOutlet var RecordItemPageTableView: UITableView!
     
-    var albumInfo: AlbumInfo?
-    var tracks = [AlbumTrack]()
-    lazy var itunesAPI : ItunesAPIController = ItunesAPIController(delegate: self)
+    var bookInfo: BookInfo!
+    var pages:[PageInfo] = []
+    
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        self.RecordItemPageTitle.text = self.albumInfo?.title
-        self.RecordItemPageDesp.text = self.albumInfo?.artistName
-        self.RecordItemPageImg.image = UIImage(data: NSData(contentsOfURL: NSURL(string: self.albumInfo!.largeImageURL)!)!)
+        self.RecordItemPageTitle.text = self.bookInfo.title
+        self.RecordItemPageDesp.text = self.bookInfo.description
+        self.RecordItemPageImg.image = self.bookInfo.coverImage?
+        //self.RecordItemPageImg.image = UIImage(data: NSData(contentsOfURL: NSURL(string: self.albumInfo!.largeImageURL)!)!)
         
-        if self.albumInfo != nil {
-            itunesAPI.lookupAlbum(self.albumInfo!.collectionId)
+        // get all the pages info
+        var query = PFQuery(className: "page")
+        query.whereKey("bookName", equalTo:self.bookInfo.title)
+        query.addAscendingOrder("pageIndex")
+        query.findObjectsInBackgroundWithBlock {
+            (objects:[AnyObject]!, error: NSError!) ->Void in
+            //dispatch_async(dispatch_get_main_queue(), {
+            if (error == nil) {
+                for object in objects {
+                    var bookName: String = object.objectForKey("bookName") as String
+                    if (bookName == self.bookInfo.title) {
+                        var pageIndex: Int = object.objectForKey("pageIndex") as Int
+                        var pageTitle: String = object.objectForKey("pageTitle") as String
+                        var pageImagePF: PFFile? = object.objectForKey("pageImage") as PFFile?
+                        var pageImageData: NSData? = pageImagePF?.getData() as NSData?
+                        var pageCoverImage: UIImage!
+                        if (pageImageData != nil ) {
+                            pageCoverImage = UIImage(data: pageImageData!)!
+                        } else {
+                            pageCoverImage = UIImage(named:"bookThumbDefault.jpg")!
+                        }
+                        var newPageItem:PageInfo = PageInfo(title: pageTitle, index: pageIndex, pageImage: pageCoverImage)
+                        
+                        self.pages.append(newPageItem)
+                    }
+                    self.RecordItemPageTableView.reloadData()
+                }
+            }
         }
+        self.RecordItemPageTableView.rowHeight = 50
     }
 
     override func didReceiveMemoryWarning() {
@@ -39,15 +70,16 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     
     // MARK: UITableViewDataSource
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tracks.count
+        return self.pages.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("AlbumItem") as? RecordAlbumTableViewCell ?? RecordAlbumTableViewCell()
         
-        let track = tracks[indexPath.row]
-        cell.titleLabel.text = track.title
-        cell.playIcon.text = "▶️"
+        let page = pages[indexPath.row]
+        cell.titleLabel.text = page.pageTitle
+        cell.pageIndex.text = String(page.pageIndex) + "/" + String(bookInfo.pagesNum)
+        cell.pageCoverImage.image = page.pageImage
         
         return cell
     }
@@ -57,12 +89,12 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     
     // MARK: APIControllerProtocol
     func didReceiveAPIResults(results: NSDictionary) {
-        var resultsArr: NSArray = results["results"] as NSArray
-        dispatch_async(dispatch_get_main_queue(), {
-            self.tracks = AlbumTrack.tracksWithJSON(resultsArr)
-            self.RecordItemPageTableView.reloadData()
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-        })
+        //var resultsArr: NSArray = results["results"] as NSArray
+        //dispatch_async(dispatch_get_main_queue(), {
+        //    self.tracks = AlbumTrack.tracksWithJSON(resultsArr)
+        //    self.RecordItemPageTableView.reloadData()
+        //    UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+        //})
     }
     
 

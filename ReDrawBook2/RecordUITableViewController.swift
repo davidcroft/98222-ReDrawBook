@@ -10,16 +10,34 @@ import UIKit
 
 class RecordUITableViewController: UITableViewController, UITableViewDataSource, ItunesAPIControllerProtocol {
     
-    var albums = [AlbumInfo]()
+    var books:[BookInfo] = []
     var itunesAPI:ItunesAPIController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        itunesAPI = ItunesAPIController(delegate: self)
-        
+        //itunesAPI = ItunesAPIController(delegate: self)
         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-        itunesAPI!.searchItunesFor("Jason Mraz")
+        //itunesAPI!.searchItunesFor("Jason Mraz")
+        
+        var query = PFQuery(className: "book")
+        query.findObjectsInBackgroundWithBlock {
+            (objects:[AnyObject]!, error: NSError!) ->Void in
+            //dispatch_async(dispatch_get_main_queue(), {
+                if error == nil {
+                    for object in objects {
+                        var bookTitle: String = object.objectForKey("title") as String
+                        var bookDescription: String = object.objectForKey("description") as String
+                        var bookCoverImagePF: PFFile = object.objectForKey("coverImage") as PFFile
+                        var bookImageData: NSData = bookCoverImagePF.getData() as NSData
+                        var bookCoverImage: UIImage? = UIImage(data: bookImageData)
+                        var newBookItem:BookInfo = BookInfo(title: bookTitle, description: bookDescription, coverImage: bookCoverImage, pagesNum: 5)
+                        self.books.append(newBookItem)
+                    }
+                    self.tableView.reloadData()
+                }
+            //})
+        }
         
         // table view init
         tableView.rowHeight = 60
@@ -38,30 +56,31 @@ class RecordUITableViewController: UITableViewController, UITableViewDataSource,
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("RecordItem") as? RecordTableViewCell ?? RecordTableViewCell()
-        let album = self.albums[indexPath.row]
+        let album = self.books[indexPath.row]
         
         cell.RecordItemTitle?.text = album.title
-        cell.RecordItemDesp?.text = album.artistName
-        cell.RecordItemThumb?.image = UIImage(named: "Blank52")
+        cell.RecordItemDesp?.text = album.description
+        //cell.RecordItemThumb?.image = UIImage(named: "Blank52")
+        cell.RecordItemThumb?.image = album.coverImage
         
         // Grab the artworkUrl60 key to get an image URL for the app's thumbnail
-        let urlString = album.thumbnailImageURL
-        let imgURL: NSURL = NSURL(string: urlString)!
+        //let urlString = album.thumbnailImageURL
+        //let imgURL: NSURL = NSURL(string: urlString)!
         // Download an NSData representation of the image at the URL
-        let imgData: NSData = NSData(contentsOfURL: imgURL)!
-        cell.RecordItemThumb?.image = UIImage(data: imgData)
+        //let imgData: NSData = NSData(contentsOfURL: imgURL)!
+        //cell.RecordItemThumb?.image = UIImage(data: imgData)
         
         return cell
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.albums.count
+        return self.books.count
     }
     
     func didReceiveAPIResults(results: NSDictionary) {
         var resultsArr: NSArray = results["results"] as NSArray
         dispatch_async(dispatch_get_main_queue(), {
-            self.albums = AlbumInfo.albumsWithJSON(resultsArr)
+            //self.albums = AlbumInfo.albumsWithJSON(resultsArr)
             self.tableView!.reloadData()
             // turn off network activity
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
@@ -74,8 +93,8 @@ class RecordUITableViewController: UITableViewController, UITableViewDataSource,
             if var secondViewController = segue.destinationViewController as? RecordItemViewController {
                 if var cell = sender as? RecordTableViewCell {
                     var albumIndex = tableView!.indexPathForSelectedRow()!.row
-                    var selectedAlbum = self.albums[albumIndex]
-                    secondViewController.albumInfo = selectedAlbum
+                    var selectedAlbum = self.books[albumIndex]
+                    secondViewController.bookInfo = selectedAlbum
                 }
             }
         default:
