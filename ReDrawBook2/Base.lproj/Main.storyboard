@@ -133,19 +133,20 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xr6-p8-Aly">
-                                                    <rect key="frame" x="58" y="15" width="220" height="19.5"/>
+                                                    <rect key="frame" x="56" y="15" width="198" height="19.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RA2-fZ-7YO"/>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d3f-f3-IGp">
-                                                    <rect key="frame" x="11" y="5" width="40" height="40"/>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d3f-f3-IGp"/>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="esz-ug-cJz">
+                                                    <rect key="frame" x="8" y="5" width="40" height="40"/>
                                                 </imageView>
                                             </subviews>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <outlet property="pageCoverImage" destination="d3f-f3-IGp" id="BSh-I3-f0x"/>
+                                            <outlet property="pageCoverImage" destination="esz-ug-cJz" id="1jJ-yF-ncM"/>
                                             <outlet property="pageIndex" destination="rum-RV-lNs" id="1dp-FP-adm"/>
                                             <outlet property="titleLabel" destination="xr6-p8-Aly" id="hY1-uR-R5q"/>
                                         </connections>

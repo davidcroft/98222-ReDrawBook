@@ -327,7 +327,7 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
         else if(pageIndex > 0) {
             if(!self.isPlaying) {
                 // audio player
-                var path = NSBundle.mainBundle().pathForResource("page1Audio", ofType:"mp3")
+                /*var path = NSBundle.mainBundle().pathForResource("page1Audio", ofType:"mp3")
                 switch pageIndex {
                 case 1:
                     path = NSBundle.mainBundle().pathForResource("page1Audio", ofType:"mp3")
@@ -347,13 +347,13 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
                     path = NSBundle.mainBundle().pathForResource("page8Audio", ofType:"mp3")
                 default:
                     path = NSBundle.mainBundle().pathForResource("page1Audio", ofType:"mp3")
-                }
+                }*/
                 NSLog("play audio \(pageIndex)")
                 
-                let fileURL = NSURL(fileURLWithPath: path!)
-                audioPlayer = AVAudioPlayer(contentsOfURL: fileURL, error: nil)
-                audioPlayer.prepareToPlay()
-                audioPlayer.play()
+                //let fileURL = NSURL(fileURLWithPath: path!)
+                //audioPlayer = AVAudioPlayer(contentsOfURL: fileURL, error: nil)
+                //audioPlayer.prepareToPlay()
+                //audioPlayer.play()
                 self.isPlaying = true
             }
             self.PlayItemPageStatus.text = "play sound track on page \(pageIndex)"

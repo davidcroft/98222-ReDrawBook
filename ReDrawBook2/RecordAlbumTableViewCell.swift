@@ -10,8 +10,8 @@ import UIKit
 
 class RecordAlbumTableViewCell: UITableViewCell {
 
-    @IBOutlet var pageIndex: UILabel!
     @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var pageIndex: UILabel!
     @IBOutlet var pageCoverImage: UIImageView!
     
     override func awakeFromNib() {
