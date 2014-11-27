@@ -27,7 +27,11 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     var timerStr:String!
     
     var soundFileURL:NSURL?
+    var currentFileName: String?
     var startRecIndex: Int = -1
+    var deleteList:[String] = []
+    
+    var uploadFlag:Bool = false
     
     
     required init(coder aDecoder: NSCoder) {
@@ -221,9 +225,59 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             /////////////// upload audio file ////////////
             let uploadAction = UIAlertAction(title: "Upload", style: .Default, handler: {
                 action in
-                self.startRecIndex = -1
-                cell.selectionStyle = UITableViewCellSelectionStyle.Default
-                self.RecordItemPageTableView.reloadData()
+                // stop first if wanna upload audio
+                if self.recorder != nil {
+                    NSLog("stop recording")
+                    self.recorder.stop()
+                    self.meterTimer.invalidate()
+                    
+                    // disable audio session
+                    let session:AVAudioSession = AVAudioSession.sharedInstance()
+                    var error: NSError?
+                    if !session.setActive(false, error: &error) {
+                        println("could not make session inactive")
+                        if let e = error {
+                            println(e.localizedDescription)
+                            return
+                        }
+                    }
+                    self.recorder = nil
+                    
+                    // update startRecIndex
+                    self.startRecIndex = -1
+                }
+                
+                // upload file
+                self.uploadFlag = true
+                
+                /*var docsDir =
+                NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+                let audioData:NSData = NSData(contentsOfFile: docsDir + "/" + self.currentFileName!)!
+                println(docsDir + "/" + self.currentFileName!)
+                //let audioData:NSData = NSData(contentsOfURL: self.soundFileURL!)!
+                //let file = PFFile(name: self.currentFileName, contentsAtPath:
+                let file = PFFile(name:self.currentFileName, data:audioData)
+                var userAudio = PFObject(className:"soundtracks")
+                userAudio["audioName"] = "username-\(self.currentFileName!)"
+                userAudio["audioFile"] = file
+                userAudio.saveInBackgroundWithTarget(nil, selector: nil)
+                
+                self.deleteAllRecordings()
+                // delete audio file
+                var fileManager = NSFileManager.defaultManager()
+                var error: NSError?
+                println(self.soundFileURL!.absoluteString)
+                println(fileManager.fileExistsAtPath(docsDir + "/" + self.currentFileName!))
+                if self.soundFileURL != nil && fileManager.fileExistsAtPath(self.soundFileURL!.absoluteString!) {
+                    if !fileManager.removeItemAtPath(self.soundFileURL!.absoluteString!, error: &error) {
+                        NSLog("could not remove \(self.soundFileURL!.absoluteString!)")
+                    } else {
+                        NSLog("remove file \(self.soundFileURL!.absoluteString!)")
+                    }
+                    if let e = error {
+                        println(e.localizedDescription)
+                    }
+                }*/
             })
             
             //alertController.addAction(StopAction)
@@ -384,12 +438,13 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     }
     
     func setupRecorder() {
-        var currentFileName = "\(bookInfo.title)-Page\(startRecIndex).m4a"
-        println(currentFileName)
+        self.currentFileName = "\(bookInfo.title)-Page\(startRecIndex).m4a"
+        println(self.currentFileName)
         var dirPaths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
         var docsDir: AnyObject = dirPaths[0]
-        var soundFilePath = docsDir.stringByAppendingPathComponent(currentFileName)
-        soundFileURL = NSURL(fileURLWithPath: soundFilePath)
+        var soundFilePath = docsDir.stringByAppendingPathComponent(self.currentFileName!)
+        self.soundFileURL = NSURL(fileURLWithPath: soundFilePath)
+        println("soundFileURL: \(self.soundFileURL)")
         let filemanager = NSFileManager.defaultManager()
         if filemanager.fileExistsAtPath(soundFilePath) {
             // probably won't happen. want to do something about it?
@@ -469,6 +524,43 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!,
         successfully flag: Bool) {
             println("finished recording \(flag)")
+            var fileManager = NSFileManager.defaultManager()
+            var docsDir =
+            NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+            let fileExist = fileManager.fileExistsAtPath(docsDir + "/" + self.currentFileName!)
+            if fileExist && self.uploadFlag {
+                // upload file
+                let audioPath: NSURL = recorder.url;
+                let audioData: NSData = NSData(contentsOfURL: audioPath)!
+                let userAudioFile: PFFile  = PFFile(name: self.currentFileName, data: audioData)
+                var userAudio:PFObject = PFObject(className:"soundtracks")
+                userAudio["audioName"] = "username-\(self.currentFileName!)"
+                userAudio["audioFile"] = userAudioFile
+                // add the url into delete list
+                self.deleteList.append(docsDir + "/" + self.currentFileName!)
+                var error:NSError
+                var succeeded:Bool!
+                userAudio.saveInBackgroundWithBlock({
+                    (succeeded: Bool!, error: NSError!) -> Void in
+                    if succeeded == true {
+                        println("upload successfully")
+                        // delete all files in delete list
+                        var error:NSError?
+                        for deleteFile in self.deleteList {
+                            if !fileManager.removeItemAtPath(deleteFile, error: &error) {
+                                NSLog("could not remove file")
+                            } else {
+                                NSLog("remove file")
+                            }
+                            if let e = error {
+                                println(e.localizedDescription)
+                            }
+                        }
+                    }
+                })
+                // set flag
+                self.uploadFlag = false
+            }
     }
     
     func audioRecorderEncodeErrorDidOccur(recorder: AVAudioRecorder!,
