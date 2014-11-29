@@ -30,6 +30,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     var currentFileName: String?
     var startRecIndex: Int = -1
     var deleteList:[String] = []
+    var tempTimer:NSTimer!
     
     var uploadFlag:Bool = false
     
@@ -245,10 +246,17 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                     
                     // update startRecIndex
                     self.startRecIndex = -1
+                    
+                    // upload file
+                    self.uploadFlag = true
+                } else {
+                    // upload file
+                    self.uploadFlag = true
+                    self.uploadAudioTrack()
                 }
                 
-                // upload file
-                self.uploadFlag = true
+                // reload ui
+                self.RecordItemPageTableView.reloadData()
                 
                 /*var docsDir =
                 NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
@@ -524,43 +532,84 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!,
         successfully flag: Bool) {
             println("finished recording \(flag)")
-            var fileManager = NSFileManager.defaultManager()
-            var docsDir =
-            NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
-            let fileExist = fileManager.fileExistsAtPath(docsDir + "/" + self.currentFileName!)
-            if fileExist && self.uploadFlag {
-                // upload file
-                let audioPath: NSURL = recorder.url;
-                let audioData: NSData = NSData(contentsOfURL: audioPath)!
-                let userAudioFile: PFFile  = PFFile(name: self.currentFileName, data: audioData)
-                var userAudio:PFObject = PFObject(className:"soundtracks")
-                userAudio["audioName"] = "username-\(self.currentFileName!)"
-                userAudio["audioFile"] = userAudioFile
-                // add the url into delete list
-                self.deleteList.append(docsDir + "/" + self.currentFileName!)
-                var error:NSError
-                var succeeded:Bool!
-                userAudio.saveInBackgroundWithBlock({
-                    (succeeded: Bool!, error: NSError!) -> Void in
-                    if succeeded == true {
-                        println("upload successfully")
-                        // delete all files in delete list
-                        var error:NSError?
-                        for deleteFile in self.deleteList {
-                            if !fileManager.removeItemAtPath(deleteFile, error: &error) {
-                                NSLog("could not remove file")
-                            } else {
-                                NSLog("remove file")
-                            }
-                            if let e = error {
-                                println(e.localizedDescription)
-                            }
-                        }
-                    }
-                })
-                // set flag
-                self.uploadFlag = false
+            if self.uploadFlag {
+                self.uploadAudioTrack()
             }
+    }
+    
+    // upload a file into server of Parse
+    func uploadAudioTrack() {
+        var fileManager = NSFileManager.defaultManager()
+        var docsDir =
+        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        let fileExist = fileManager.fileExistsAtPath(docsDir + "/" + self.currentFileName!)
+        if fileExist && self.uploadFlag {
+            // upload file
+            // check if there is an item in server
+            var query = PFQuery(className: "soundtracks")
+            query.whereKey("audioName", equalTo:"username-\(self.currentFileName!)")
+            query.findObjectsInBackgroundWithBlock {
+                (objects:[AnyObject]!, error: NSError!) ->Void in
+                if (error == nil) {
+                    var userAudio:PFObject
+                    let audioPath: NSURL = self.soundFileURL!
+                    let audioData: NSData = NSData(contentsOfURL: audioPath)!
+                    let userAudioFile: PFFile  = PFFile(name: self.currentFileName, data: audioData)
+                    
+                    if objects.count == 0 {
+                        // not exist in server
+                        userAudio = PFObject(className:"soundtracks")
+                    } else {
+                        userAudio = objects.first as PFObject
+                    }
+                    
+                    userAudio["audioName"] = "username-\(self.currentFileName!)"
+                    userAudio["audioFile"] = userAudioFile
+                    
+                    // add the url into delete list
+                    self.deleteList.append(docsDir + "/" + self.currentFileName!)
+                    
+                    var error:NSError
+                    var succeeded:Bool!
+                    userAudio.saveInBackgroundWithBlock({
+                        (succeeded: Bool!, error: NSError!) -> Void in
+                        if succeeded == true {
+                            println("upload successfully")
+                            // delete all files in delete list
+                            var error:NSError?
+                            for deleteFile in self.deleteList {
+                                if fileManager.fileExistsAtPath(deleteFile) {
+                                    if !fileManager.removeItemAtPath(deleteFile, error: &error) {
+                                        NSLog("could not remove file")
+                                    } else {
+                                        NSLog("remove file")
+                                    }
+                                    if let e = error {
+                                        println(e.localizedDescription)
+                                    }
+                                }
+                            }
+                            // alert controller
+                            let alertController = UIAlertController(title: "Upload finished!", message: "", preferredStyle: .Alert)
+                            // dismiss view controller automatically in a 1s
+                            self.presentViewController(alertController, animated: true, completion: { () -> Void in
+                                self.tempTimer = NSTimer.scheduledTimerWithTimeInterval(1.5,
+                                    target:self,
+                                    selector:"updateTempTimer:",
+                                    userInfo:nil,
+                                    repeats:false)
+                            })
+                        }
+                    })
+                    // set flag
+                    self.uploadFlag = false
+                }
+            }
+        }
+    }
+    
+    func updateTempTimer(timer:NSTimer) {
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
     func audioRecorderEncodeErrorDidOccur(recorder: AVAudioRecorder!,
