@@ -5,6 +5,9 @@
 //  Created by Ding Xu on 10/14/14.
 //  Copyright (c) 2014 Ding Xu. All rights reserved.
 //
+//  Parse server name:
+//  audioName: username-bookname-pageIndex
+//
 
 import UIKit
 import AVFoundation
@@ -123,7 +126,15 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         cell.titleLabel.textColor = UIColor.blackColor()
         cell.pageIndex.textColor = UIColor.blackColor()
         cell.backgroundColor = UIColor.whiteColor()
-        cell.selectionStyle = UITableViewCellSelectionStyle.Default
+        
+        // customized selection style
+        let cellBGView = UIView()
+        // don't forget to divide by 255 from R G B value
+        //cellBGView.backgroundColor = UIColor(red: 140/255, green: 206/255, blue: 110/255, alpha: 1)
+        cellBGView.backgroundColor = UIColor(red: 0.298, green: 0.851, blue: 0.3922, alpha: 1.0)
+        // must set to a style and then customize the background, because style set to be none later
+        cell.selectionStyle = UITableViewCellSelectionStyle.Blue        // important
+        cell.selectedBackgroundView = cellBGView
         
         if self.startRecIndex == indexPath.row {
             cell.titleLabel.textColor = UIColor.whiteColor()
@@ -213,15 +224,6 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                 self.player.play()
                 self.presentViewController(alertController, animated: true, completion: nil)
             })
-            //playAction.enabled = false
-            
-            /*/////////////// stop recording ////////////
-            let StopAction = UIAlertAction(title: "Stop", style: .Default, handler: {
-                action in
-                self.startRecIndex = -1
-                //playAction.enabled = true
-                self.presentViewController(alertController, animated: true, completion: nil)
-            })*/
             
             /////////////// upload audio file ////////////
             let uploadAction = UIAlertAction(title: "Upload", style: .Default, handler: {
@@ -249,7 +251,9 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                     
                     // upload file
                     self.uploadFlag = true
-                } else {
+                }
+                
+                else {
                     // upload file
                     self.uploadFlag = true
                     self.uploadAudioTrack()
@@ -257,35 +261,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                 
                 // reload ui
                 self.RecordItemPageTableView.reloadData()
-                
-                /*var docsDir =
-                NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
-                let audioData:NSData = NSData(contentsOfFile: docsDir + "/" + self.currentFileName!)!
-                println(docsDir + "/" + self.currentFileName!)
-                //let audioData:NSData = NSData(contentsOfURL: self.soundFileURL!)!
-                //let file = PFFile(name: self.currentFileName, contentsAtPath:
-                let file = PFFile(name:self.currentFileName, data:audioData)
-                var userAudio = PFObject(className:"soundtracks")
-                userAudio["audioName"] = "username-\(self.currentFileName!)"
-                userAudio["audioFile"] = file
-                userAudio.saveInBackgroundWithTarget(nil, selector: nil)
-                
-                self.deleteAllRecordings()
-                // delete audio file
-                var fileManager = NSFileManager.defaultManager()
-                var error: NSError?
-                println(self.soundFileURL!.absoluteString)
-                println(fileManager.fileExistsAtPath(docsDir + "/" + self.currentFileName!))
-                if self.soundFileURL != nil && fileManager.fileExistsAtPath(self.soundFileURL!.absoluteString!) {
-                    if !fileManager.removeItemAtPath(self.soundFileURL!.absoluteString!, error: &error) {
-                        NSLog("could not remove \(self.soundFileURL!.absoluteString!)")
-                    } else {
-                        NSLog("remove file \(self.soundFileURL!.absoluteString!)")
-                    }
-                    if let e = error {
-                        println(e.localizedDescription)
-                    }
-                }*/
+
             })
             
             //alertController.addAction(StopAction)
@@ -295,18 +271,70 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             self.presentViewController(alertController, animated: true, completion: nil)
         }
         
+        else {
+            // not recording, play audio after click on corresponding table view cell
+            let cell = tableView.dequeueReusableCellWithIdentifier("AlbumItem") as?
+                RecordAlbumTableViewCell ?? RecordAlbumTableViewCell()
+            
+            // stop recording (should never be true)
+            if self.recorder != nil {
+                self.recorder.stop()
+            }
+            
+            // stop playing if player is playing audio track
+            if self.player != nil && self.player.playing {
+                self.player.stop()
+            }
+            
+            // retrieve audio track and play
+            let pageIndex:String = String(indexPath.row)
+            println("PLAY: pageIndex = \(pageIndex)")
+            var query = PFQuery(className: "soundtracks")
+            // generate the audioName of clicked page for query (username-bookTitle-pageIndex.m4a)
+            query.whereKey("audioName", equalTo:"username-\(self.bookInfo.title)-Page\(pageIndex).m4a")
+            query.findObjectsInBackgroundWithBlock {
+                (objects:[AnyObject]!, error: NSError!) ->Void in
+                if (error == nil) {
+                    if objects.count != 0 {
+                        // has record in the server
+                        let userObject:PFObject = objects.first as PFObject
+                        let audioFile: PFFile! = userObject.objectForKey("audioFile") as PFFile
+                        let recordURL: NSURL = NSURL(string: audioFile.url)!
+                        let recordData: NSData = NSData(contentsOfURL: recordURL)!
+                        var error: NSError?
+                        
+                        // play remote audio with URL, use AVAudioPlayer(data: recordData, error: &error)
+                        self.player = AVAudioPlayer(data: recordData, error: &error)
+                        if self.player == nil {
+                            if let e = error {
+                                println(e.localizedDescription)
+                                return
+                            }
+                        }
+                        self.player.delegate = self
+                        self.player.prepareToPlay()
+                        self.player.volume = 1.0
+                        self.player.play()
+                    }
+                    else {
+                        // has no record in the server
+                        let alertController = UIAlertController(title: nil, message: "Found no record in server, record now?", preferredStyle: .Alert)
+                        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
+                        let recordAction = UIAlertAction(title: "Record", style: .Default, handler: {
+                            action in
+                            // start recording for table view cell
+                            self.startRecording(indexPath.row)
+                            
+                        })
+                        alertController.addAction(recordAction)
+                        alertController.addAction(cancelAction)
+                        self.presentViewController(alertController, animated: true, completion: nil)
+                    }
+                }
+            }
+        }
+        
     }
-    
-    // MARK: APIControllerProtocol
-    func didReceiveAPIResults(results: NSDictionary) {
-        //var resultsArr: NSArray = results["results"] as NSArray
-        //dispatch_async(dispatch_get_main_queue(), {
-        //    self.tracks = AlbumTrack.tracksWithJSON(resultsArr)
-        //    self.RecordItemPageTableView.reloadData()
-        //    UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-        //})
-    }
-    
 
     /////////////// swipe left to appear buttons /////////////
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -363,20 +391,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             // start action
             let startAction = UIAlertAction(title: "Start", style: .Default, handler: {
                 action in
-                // set startRecIndex
-                self.startRecIndex = indexPath.row
-                // stop playing if player is playing audio track
-                if self.player != nil && self.player.playing {
-                    self.player.stop()
-                }
-                if (self.recorder == nil) {
-                    NSLog("recorder nil, start recording")
-                    self.recordWithPermission(true)
-                } else if (self.recorder != nil && !self.recorder.recording) {
-                    NSLog("recorder not nil, continue recording")
-                    self.recordWithPermission(false)
-                }
-                self.RecordItemPageTableView.reloadData()
+                // start recording for table view cell
+                self.startRecording(indexPath.row)
             })
             
             alertController.addAction(startAction)
@@ -477,6 +493,25 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         }
     }
     
+    func startRecording(pageIndex:Int) {
+        // set startRecIndex
+        self.startRecIndex = pageIndex
+        // stop playing if player is playing audio track
+        if self.player != nil && self.player.playing {
+            self.player.stop()
+        }
+        if (self.recorder == nil) {
+            NSLog("recorder nil, start recording")
+            self.recordWithPermission(true)
+        }
+        else if (self.recorder != nil && !self.recorder.recording) {
+            // should never come to here
+            NSLog("SHOULD NEVER COME TO HERE: recorder not nil, continue recording")
+            self.recordWithPermission(false)
+        }
+        self.RecordItemPageTableView.reloadData()
+    }
+    
     func recordWithPermission(setup:Bool) {
         let session:AVAudioSession = AVAudioSession.sharedInstance()
         // ios 8 and later
@@ -528,7 +563,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         }
     }
     
-    // AVAudioRecorderDelegate
+    // MARK: AVAudioRecorderDelegate
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!,
         successfully flag: Bool) {
             println("finished recording \(flag)")
@@ -617,7 +652,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             println("\(error.localizedDescription)")
     }
 
-    // AVAudioPlayerDelegate
+    // MARK: AVAudioPlayerDelegate
     func audioPlayerDidFinishPlaying(player: AVAudioPlayer!, successfully flag: Bool) {
         println("finished playing \(flag)")
     }
