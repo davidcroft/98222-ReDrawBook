@@ -23,11 +23,16 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     var pages:[PageInfo] = []
     
     
-    // recording
+    // audio recorder and player
     var recorder: AVAudioRecorder!
     var player:AVAudioPlayer!
+    // record meter
     var meterTimer:NSTimer!
     var timerStr:String!
+    // play meter
+    var playMeterTimer: NSTimer!
+    var playTimeStr: String!
+    var startPlayIndex: Int = -1
     
     var soundFileURL:NSURL?
     var currentFileName: String?
@@ -98,16 +103,29 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         self.deleteAllRecordings()
     }
     
+    // recording audio meter
     func updateAudioMeter(timer:NSTimer) {
         if self.recorder.recording {
             let dFormat = "%02d"
             let min:Int = Int(self.recorder.currentTime / 60)
             let sec:Int = Int(self.recorder.currentTime % 60)
-            timerStr = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
+            self.timerStr = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
             self.RecordItemPageTableView.reloadData()
             self.recorder.updateMeters()
-            var apc0 = self.recorder.averagePowerForChannel(0)
-            var peak0 = self.recorder.peakPowerForChannel(0)
+            //var apc0 = self.recorder.averagePowerForChannel(0)
+            //var peak0 = self.recorder.peakPowerForChannel(0)
+        }
+    }
+    
+    func updateAudioPlayMeter(timer:NSTimer) {
+        // playing audio meter
+        if self.player.playing {
+            let dFormat = "%02d"
+            let min:Int = Int(self.player.currentTime / 60)
+            let sec:Int = Int(self.player.currentTime % 60)
+            self.playTimeStr = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
+            self.RecordItemPageTableView.reloadData()
+            self.player.updateMeters()
         }
     }
 
@@ -149,12 +167,20 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             cell.backgroundColor = UIColor.redColor()
             cell.selectionStyle = UITableViewCellSelectionStyle.None
             
-            cell.pageLength.text = timerStr
+            cell.pageLength.text = self.timerStr
         }
         
         // after start recording, select table view cell will has no effect but to pop up action sheet
         if self.startRecIndex > 0 {
             cell.selectionStyle = UITableViewCellSelectionStyle.None
+        }
+        
+        // if playing audio, display the meter in length field
+        if self.player != nil && self.player.playing && self.startPlayIndex == page.pageIndex {
+            cell.pageLength.text = self.playTimeStr
+            cell.backgroundColor = UIColor(red: 0.298, green: 0.851, blue: 0.3922, alpha: 1.0)
+            cell.titleLabel.textColor = UIColor.whiteColor()
+            cell.pageLength.textColor = UIColor.whiteColor()
         }
         
         return cell
@@ -267,6 +293,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                     // stop playing if player is playing audio track
                     if self.player != nil && self.player.playing {
                         self.player.stop()
+                        //self.playMeterTimer.invalidate()
                     }
                     
                     // upload file
@@ -286,6 +313,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             self.presentViewController(alertController, animated: true, completion: nil)
         }
         
+        ////////////////
+        ////////////////
         else {
             // not recording, play audio after click on corresponding table view cell
             let cell = tableView.dequeueReusableCellWithIdentifier("AlbumItem") as?
@@ -299,6 +328,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             // stop playing if player is playing audio track
             if self.player != nil && self.player.playing {
                 self.player.stop()
+                self.playMeterTimer.invalidate()
+                self.clearPlayIndex()
             }
             
             // retrieve audio track and play, pageIndex in server starts from 1 instead of 0
@@ -330,6 +361,15 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                         self.player.prepareToPlay()
                         self.player.volume = 1.0
                         self.player.play()
+                        
+                        // update play meter
+                        self.startPlayIndex = indexPath.row + 1
+                        self.playMeterTimer = NSTimer.scheduledTimerWithTimeInterval(0.1,
+                            target:self,
+                            selector:"updateAudioPlayMeter:",
+                            userInfo:nil,
+                            repeats:true)
+
                     }
                     else {
                         // has no record in the server
@@ -514,6 +554,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         // stop playing if player is playing audio track
         if self.player != nil && self.player.playing {
             self.player.stop()
+            self.playMeterTimer.invalidate()
+            self.clearPlayIndex()
         }
         if (self.recorder == nil) {
             NSLog("recorder nil, start recording")
@@ -700,6 +742,14 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     // MARK: AVAudioPlayerDelegate
     func audioPlayerDidFinishPlaying(player: AVAudioPlayer!, successfully flag: Bool) {
         println("finished playing \(flag)")
+        if self.startPlayIndex > 0 {
+            self.clearPlayIndex()
+        }
+    }
+    
+    func clearPlayIndex() {
+        self.startPlayIndex = -1
+        self.RecordItemPageTableView.reloadData()
     }
     
     func audioPlayerDecodeErrorDidOccur(player: AVAudioPlayer!, error: NSError!) {
