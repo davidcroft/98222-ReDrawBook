@@ -126,12 +126,6 @@
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="eYD-2j-nEE" id="9ow-eD-7Vt">
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="index" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rum-RV-lNs">
-                                                    <rect key="frame" x="260" y="13" width="52" height="24"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xr6-p8-Aly">
                                                     <rect key="frame" x="56" y="15" width="198" height="19.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -143,11 +137,17 @@
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="esz-ug-cJz">
                                                     <rect key="frame" x="8" y="5" width="40" height="40"/>
                                                 </imageView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="len" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rum-RV-lNs">
+                                                    <rect key="frame" x="260" y="13" width="52" height="24"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
                                             </subviews>
                                         </tableViewCellContentView>
                                         <connections>
                                             <outlet property="pageCoverImage" destination="esz-ug-cJz" id="1jJ-yF-ncM"/>
-                                            <outlet property="pageIndex" destination="rum-RV-lNs" id="1dp-FP-adm"/>
+                                            <outlet property="pageLength" destination="rum-RV-lNs" id="B9E-bE-7fc"/>
                                             <outlet property="titleLabel" destination="xr6-p8-Aly" id="hY1-uR-R5q"/>
                                         </connections>
                                     </tableViewCell>

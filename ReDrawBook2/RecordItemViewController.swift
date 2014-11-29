@@ -72,14 +72,21 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                             } else {
                                 pageCoverImage = UIImage(named:"bookThumbDefault.jpg")!
                             }
-                            var newPageItem:PageInfo = PageInfo(title: pageTitle, index: pageIndex, pageImage: pageCoverImage)
+                            
+                            // retrieve page audio length: block method
+                            let audioName = "username-\(self.bookInfo.title)-Page\(pageIndex).m4a"
+                            let pageLength: String = self.queryBlockForAudioTrackLength(audioName)
+                            
+                            // create a new pageItem and append it to pages
+                            var newPageItem:PageInfo = PageInfo(title: pageTitle, index: pageIndex, pageImage: pageCoverImage, length: pageLength)
                             /*dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                self.pages.append(newPageItem)
+                            self.pages.append(newPageItem)
                             })*/
                             self.pages.append(newPageItem)
+                            
+                            self.RecordItemPageTableView.rowHeight = 50
+                            self.RecordItemPageTableView.reloadData()
                         }
-                        self.RecordItemPageTableView.reloadData()
-                        self.RecordItemPageTableView.rowHeight = 50
                     }
                 }
             }
@@ -120,11 +127,11 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         let cell = tableView.dequeueReusableCellWithIdentifier("AlbumItem") as? RecordAlbumTableViewCell ?? RecordAlbumTableViewCell()
         
         let page = pages[indexPath.row]
-        cell.titleLabel.text = page.pageTitle
-        cell.pageIndex.text = String(page.pageIndex) + "/" + String(bookInfo.pagesNum)
+        cell.titleLabel.text = "\(page.pageIndex)/\(bookInfo.pagesNum): \(page.pageTitle)"
+        cell.pageLength.text = page.pageLength
         cell.pageCoverImage.image = page.pageImage
         cell.titleLabel.textColor = UIColor.blackColor()
-        cell.pageIndex.textColor = UIColor.blackColor()
+        cell.pageLength.textColor = UIColor.blackColor()
         cell.backgroundColor = UIColor.whiteColor()
         
         // customized selection style
@@ -136,17 +143,17 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         cell.selectionStyle = UITableViewCellSelectionStyle.Blue        // important
         cell.selectedBackgroundView = cellBGView
         
-        if self.startRecIndex == indexPath.row {
+        if self.startRecIndex == page.pageIndex {
             cell.titleLabel.textColor = UIColor.whiteColor()
-            cell.pageIndex.textColor = UIColor.whiteColor()
+            cell.pageLength.textColor = UIColor.whiteColor()
             cell.backgroundColor = UIColor.redColor()
             cell.selectionStyle = UITableViewCellSelectionStyle.None
             
-            cell.pageIndex.text = timerStr
+            cell.pageLength.text = timerStr
         }
         
         // after start recording, select table view cell will has no effect but to pop up action sheet
-        if self.startRecIndex >= 0 {
+        if self.startRecIndex > 0 {
             cell.selectionStyle = UITableViewCellSelectionStyle.None
         }
         
@@ -154,7 +161,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if (self.startRecIndex >= 0) {
+        if (self.startRecIndex > 0) {
             // is recording
             let cell = tableView.dequeueReusableCellWithIdentifier("AlbumItem") as?
                 RecordAlbumTableViewCell ?? RecordAlbumTableViewCell()
@@ -166,7 +173,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             }
             
             // update alert view
-            let alertController = UIAlertController(title: "Recording", message: timerStr, preferredStyle: .ActionSheet)
+            let alertController = UIAlertController(title: "Recording", message: self.timerStr, preferredStyle: .ActionSheet)
             
             ////////////// continue recording ////////////
             let continueAction = UIAlertAction(title: "Continue", style: .Cancel, handler: {
@@ -229,6 +236,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             let uploadAction = UIAlertAction(title: "Upload", style: .Default, handler: {
                 action in
                 // stop first if wanna upload audio
+                
+                // hit upload button directly
                 if self.recorder != nil {
                     NSLog("stop recording")
                     self.recorder.stop()
@@ -253,7 +262,13 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                     self.uploadFlag = true
                 }
                 
+                // hit upload button after playing
                 else {
+                    // stop playing if player is playing audio track
+                    if self.player != nil && self.player.playing {
+                        self.player.stop()
+                    }
+                    
                     // upload file
                     self.uploadFlag = true
                     self.uploadAudioTrack()
@@ -286,8 +301,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                 self.player.stop()
             }
             
-            // retrieve audio track and play
-            let pageIndex:String = String(indexPath.row)
+            // retrieve audio track and play, pageIndex in server starts from 1 instead of 0
+            let pageIndex:String = String(indexPath.row + 1)
             println("PLAY: pageIndex = \(pageIndex)")
             var query = PFQuery(className: "soundtracks")
             // generate the audioName of clicked page for query (username-bookTitle-pageIndex.m4a)
@@ -322,8 +337,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
                         let recordAction = UIAlertAction(title: "Record", style: .Default, handler: {
                             action in
-                            // start recording for table view cell
-                            self.startRecording(indexPath.row)
+                            // start recording for table view cell, pageIndex start from 1 instead of 0, so indexPath.row + 1
+                            self.startRecording(indexPath.row + 1)
                             
                         })
                         alertController.addAction(recordAction)
@@ -392,7 +407,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             let startAction = UIAlertAction(title: "Start", style: .Default, handler: {
                 action in
                 // start recording for table view cell
-                self.startRecording(indexPath.row)
+                self.startRecording(indexPath.row+1)
             })
             
             alertController.addAction(startAction)
@@ -600,6 +615,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                     
                     userAudio["audioName"] = "username-\(self.currentFileName!)"
                     userAudio["audioFile"] = userAudioFile
+                    userAudio["audioLength"] = self.timerStr
                     
                     // add the url into delete list
                     self.deleteList.append(docsDir + "/" + self.currentFileName!)
@@ -628,6 +644,9 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                             let alertController = UIAlertController(title: "Upload finished!", message: "", preferredStyle: .Alert)
                             // dismiss view controller automatically in a 1s
                             self.presentViewController(alertController, animated: true, completion: { () -> Void in
+                                // upload page info (length) and reload page
+                                self.updatePageLength()
+                                // set a timer for notification
                                 self.tempTimer = NSTimer.scheduledTimerWithTimeInterval(1.5,
                                     target:self,
                                     selector:"updateTempTimer:",
@@ -641,6 +660,32 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                 }
             }
         }
+    }
+    
+    func queryBlockForAudioTrackLength(audioName: String) -> String {
+        let queryAudio = PFQuery(className: "soundtracks")
+        queryAudio.whereKey("audioName", equalTo:audioName)
+        var error: NSError
+        let userAudioObjects: [PFObject] = queryAudio.findObjects() as [PFObject]
+        var pageLength: String
+        if userAudioObjects.count != 0 {
+            let userAudioObject: PFObject = userAudioObjects.first!
+            pageLength = userAudioObject.objectForKey("audioLength") as String
+        } else {
+            pageLength = "00:00"
+        }
+        return pageLength
+    }
+    
+    func updatePageLength() {
+        for page in pages {
+            // retrieve page audio length: block method
+            let audioName = "username-\(self.bookInfo.title)-Page\(page.pageIndex).m4a"
+            page.pageLength = self.queryBlockForAudioTrackLength(audioName)
+            println("\(page.pageIndex): \(page.pageLength)")
+        }
+        // reload page info
+        self.RecordItemPageTableView.reloadData()
     }
     
     func updateTempTimer(timer:NSTimer) {

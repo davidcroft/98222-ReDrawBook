@@ -26,10 +26,12 @@ class PageInfo {
     var pageTitle: String
     var pageIndex: Int
     var pageImage: UIImage
+    var pageLength: String
     
-    init(title: String, index: Int, pageImage: UIImage) {
+    init(title: String, index: Int, pageImage: UIImage, length:String) {
         self.pageTitle = title
         self.pageIndex = index
         self.pageImage = pageImage
+        self.pageLength = length
     }
 }
