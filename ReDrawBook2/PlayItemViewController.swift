@@ -11,25 +11,18 @@ import MediaPlayer
 import CoreBluetooth
 import AVFoundation
 
-class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBCentralManagerDelegate, CBPeripheralDelegate {
+class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     @IBOutlet var PlayItemPageStatus: UILabel!
     @IBOutlet var PlayItemPageTitle: UILabel!
     @IBOutlet var PlayItemPageIndex: UILabel!
     @IBOutlet var PlayItemPageImg: UIImageView!
     
-    var tracks = [AlbumTrack]()
-    lazy var ItunesAPI : ItunesAPIController = ItunesAPIController(delegate: self)
-    
-    
     // audio player
-    var mediaPlayer: MPMoviePlayerController = MPMoviePlayerController()
+    //var mediaPlayer: MPMoviePlayerController = MPMoviePlayerController()
     var audioPlayer : AVAudioPlayer! = nil // will be Optional, must supply initializer
     
     var startPlayFlag: Bool = false
-    
-    
-    var albumInfo = AlbumInfo(name: "", price: "", thumbnailImageURL: "", largeImageURL: "", itemURL: "", artistURL: "", artistName: "", collectionId: 0)
     
     // bluetooth
     let serviceUUID = CBUUID(string: "6e400001-b5a3-f393-e0a9-e50e24dcca9e")
@@ -54,7 +47,7 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
     var pageIndexTemp:Int! = 0
     var pageRecogCountFlag:Bool = false
     var pageRecogCounter:Int! = 0
-    let pageRecogCounterInit = 10
+    let pageRecogCounterInit = 2
     var isPlaying:Bool = false
     
     required init(coder aDecoder: NSCoder) {
@@ -76,7 +69,7 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
         self.PlayItemPageImg.sizeToFit()
         
         // text
-        self.PlayItemPageStatus.text = "waiting for touch event on paper ..."
+        self.PlayItemPageStatus.text = "connect to book ..."
         self.PlayItemPageStatus.backgroundColor = UIColor.redColor()
         self.PlayItemPageStatus.textColor = UIColor.whiteColor()
         //self.PlayItemPageTitle.text = albumInfo.title
@@ -107,36 +100,11 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
         // Dispose of any resources that can be recreated.
     }
     
-    func didReceiveAPIResults(results: NSDictionary) {
-        var resultsArr: NSArray = results["results"] as NSArray
-        dispatch_async(dispatch_get_main_queue(), {
-            self.tracks = AlbumTrack.tracksWithJSON(resultsArr)
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            self.startPlayFlag = true
-            //self.viewDidAppear(false)
-        })
-    }
-    
     override func viewDidAppear(animated: Bool) {
-        // play song
-        if (startPlayFlag) {
-            var track = self.tracks[0]
-            self.playAudio(track.previewUrl)
-        }
     }
     
     override func viewWillDisappear(animated: Bool) {
-        mediaPlayer.stop()
     }
-    
-    func playAudio(url: String) {
-        mediaPlayer.stop()
-        mediaPlayer.contentURL = NSURL(string: url)
-        //println(track.previewUrl)
-        println(mediaPlayer.contentURL)
-        mediaPlayer.play()
-    }
-    
     
     //////////////////////////////////////////////////
     ///////////// Bluetooth connection ///////////////
@@ -209,6 +177,7 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
                             // send first message only after both rx and tx characters have been set
                             if (txCharacteristic != nil) {
                                 self.sendBLEMsg("hello, world")
+                                self.PlayItemPageStatus.text = "waiting for touch event on paper ..."
                             }
                         } else if (c.UUID.UUIDString == txCharUUID.UUIDString) {
                             NSLog("Found TX Characteristics")
@@ -217,6 +186,7 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
                             // send first message only after both rx and tx characters have been set
                             if (rxCharacteristic != nil) {
                                 self.sendBLEMsg("hello, world")
+                                self.PlayItemPageStatus.text = "waiting for touch event on paper ..."
                             }
                         } else if (c.UUID.UUIDString == hardwareRevisionStrUUID.UUIDString) {
                             NSLog("Found Hardware Revision String characteristic")
@@ -237,27 +207,42 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
     func peripheral(peripheral: CBPeripheral!, didUpdateValueForCharacteristic characteristic: CBCharacteristic!, error: NSError!) {
         //NSLog("Did Update Value For Characteristic")
         if error == nil {
-            if (characteristic == rxCharacteristic) {
-                //NSLog("Recieved: \(characteristic.value)")
-                let rxStr:NSString! = NSString(data: characteristic.value, encoding:NSUTF8StringEncoding)
-                //println(rxStr)
-                NSLog("Received value is \(rxStr)")
-                readBookPage(rxStr)
-            }
-            else if characteristic.UUID.UUIDString == hardwareRevisionStrUUID.UUIDString {
-                NSLog("Did read hardware revision string")
-                var hwRevision:NSString = ""
-                var bytes:UnsafePointer<UInt8> = UnsafePointer<UInt8>(characteristic.value.bytes)
-                var i:Int
-                for (i = 0; i < characteristic.value.length; i++){
-                    hwRevision = hwRevision.stringByAppendingFormat("0x%x, ", bytes[i])
+            // create a new thread to read characters
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
+                if (characteristic == self.rxCharacteristic) {
+                    //NSLog("Recieved: \(characteristic.value)")
+                    let rxStr:NSString! = NSString(data: characteristic.value, encoding:NSUTF8StringEncoding)
+                    //NSLog("Received value is \(rxStr)")
+                    let pageIndex:Int = self.readBookPage(rxStr)
+                    if pageIndex >= 0 {
+                        // if pageIndex is not identical with current page index, activate a new update process
+                        if self.pageIndexCurr != pageIndex && !self.pageRecogCountFlag {
+                            // init a new recognition process
+                            println("start new recognition")
+                            self.pageRecogCountFlag = true
+                            self.pageRecogCounter = self.pageRecogCounterInit
+                            self.pageIndexTemp = pageIndex
+                        }
+                        else if self.pageRecogCountFlag {
+                            //println("during a recognition")
+                            self.pageRecognition(pageIndex)
+                        }
+                    }
                 }
-                //Once hardware revision string is read, connection to Bluefruit is complete
-                let hwStr = hwRevision.substringToIndex(hwRevision.length-2)
-                NSLog("HW Revision: \(hwStr)")
-            }
-        }
-        else {
+                else if characteristic.UUID.UUIDString == self.hardwareRevisionStrUUID.UUIDString {
+                    //NSLog("Did read hardware revision string")
+                    var hwRevision:NSString = ""
+                    var bytes:UnsafePointer<UInt8> = UnsafePointer<UInt8>(characteristic.value.bytes)
+                    var i:Int
+                    for (i = 0; i < characteristic.value.length; i++){
+                        hwRevision = hwRevision.stringByAppendingFormat("0x%x, ", bytes[i])
+                    }
+                    //Once hardware revision string is read, connection to Bluefruit is complete
+                    let hwStr = hwRevision.substringToIndex(hwRevision.length-2)
+                    NSLog("HW Revision: \(hwStr)")
+                }
+            })
+        } else {
             NSLog("Error receiving notification for characteristic: \(error)")
             return
         }
@@ -283,34 +268,56 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
         }
     }
     
-    func readBookPage(recStr: String!) {
+    func readBookPage(recStr: String!) -> Int{
         // retrieve page number from recStr
         var startIndex=recStr.rangeOfString(BLEPageMsgStart)?.startIndex
         var endIndex=recStr.rangeOfString(BLEPageMsgEnd)?.startIndex
         // check availability
         //if (startIndex != nil && endIndex != nil) {
         if (startIndex != nil) {
-            //var pageIndexStr:String = recStr.substringWithRange(Range<String.Index>(start: startIndex!, end: endIndex!))
             let index: String.Index = advance(recStr.startIndex, 6)
             var pageIndexStr:String = recStr.substringFromIndex(index)
             var pageIndex:Int = pageIndexStr.toInt()!
-            // play the corresponding page sound track
-            self.PlayItemPageIndex.text = "\(pageIndex)/10"
-            if (pageIndex > 0) {
-                //pageRecognition(pageIndex)
-                /*let queue = NSOperationQueue()
-                queue.addOperationWithBlock() {
-                NSOperationQueue.mainQueue().addOperationWithBlock() {
-                // when done, update your UI and/or model on the main queue
+            //println(pageIndex)
+            return pageIndex
+        }
+        return -1
+    }
+    
+    // Successive pageRecogCounterInit exact pageIndex will update current page index
+    func pageRecognition(pageIndex: Int!) {
+        if (self.pageRecogCountFlag) {
+            // during a recognition process
+            // identify if counter comes to 0
+            if (self.pageRecogCounter <= 0) {
+                // yes, update current page
+                self.pageIndexCurr = self.pageIndexTemp
+                println("update page: index = \(self.pageIndexCurr)")
+                // stop recognition
+                self.pageRecogCountFlag = false
+                // update UI
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    if self.pageIndexCurr > 0 {
+                        // page > 0
+                        self.PlayItemPageStatus.text = "play sound track on page \(self.pageIndexCurr)"
+                        self.PlayItemPageStatus.backgroundColor = UIColor(red: 0.298, green: 0.851, blue: 0.3922, alpha: 1.0)
+                        self.PlayItemPageIndex.text = "\(self.pageIndexCurr)/20"
+                    } else {
+                        // page == 0
+                        self.PlayItemPageStatus.text = "waiting for touch event on paper ..."
+                        self.PlayItemPageStatus.backgroundColor = UIColor.redColor()
+                        self.PlayItemPageIndex.text = "\(self.pageIndexCurr)/20"
+                    }
+                })
+            } else {
+                // not yet, identify if pageIndex and pageIndexTemp are identical
+                if (self.pageIndexTemp == pageIndex) {
+                    // yes, counter down counter and wait for next comparision
+                    self.pageRecogCounter = self.pageRecogCounter - 1
+                } else {
+                    // no, not same with pageIndexTemp, not update page and reset recognition
+                    self.pageRecogCountFlag = false
                 }
-                self.playAudio(pageIndex)
-                }*/
-                playAudio(pageIndex)
-            }
-            else {
-                self.PlayItemPageStatus.text = "waiting for touch event on paper ..."
-                self.PlayItemPageStatus.backgroundColor = UIColor.redColor()
-                self.PlayItemPageStatus.textColor = UIColor.whiteColor()
             }
         }
     }
@@ -359,34 +366,6 @@ class PlayItemViewController: UIViewController, ItunesAPIControllerProtocol, CBC
             self.PlayItemPageStatus.text = "play sound track on page \(pageIndex)"
             self.PlayItemPageStatus.backgroundColor = UIColor.greenColor()
             self.PlayItemPageStatus.textColor = UIColor.whiteColor()
-        }
-    }
-    
-    func pageRecognition(pageIndex: Int!) {
-        if (self.pageRecogCountFlag) {
-            // start counting indicates delay several message to see turning to a new page or touch accidently
-            if (self.pageRecogCounter > 0) {
-                if (pageIndex != self.pageIndexTemp) {
-                    // touch accidently, quit abnormally
-                    self.pageIndexTemp = self.pageIndexCurr
-                    NSLog("Page \(self.pageIndexCurr)")
-                    self.pageRecogCountFlag = false
-                } else {
-                    self.pageRecogCounter = self.pageRecogCounter - 1
-                }
-            } else {
-                // pageRecogCounter <= 0 (delay), turn to a new page, update page info
-                self.pageIndexCurr = self.pageIndexTemp
-                NSLog("Page \(self.pageIndexCurr)")
-                self.pageRecogCountFlag = false     // quit normally
-            }
-        } else {
-            if (pageIndex != self.pageIndexCurr) {
-                // newly come page is different current one, start counting to identify whether a new page touch event or touch accidently
-                self.pageIndexTemp = pageIndex
-                self.pageRecogCountFlag = true
-                self.pageRecogCounter = self.pageRecogCounterInit
-            }
         }
     }
     
