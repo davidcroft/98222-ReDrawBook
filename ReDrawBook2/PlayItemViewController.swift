@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import MediaPlayer
 import CoreBluetooth
 import AVFoundation
 
@@ -18,9 +17,10 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     @IBOutlet var PlayItemPageIndex: UILabel!
     @IBOutlet var PlayItemPageImg: UIImageView!
     
-    // audio player
-    //var mediaPlayer: MPMoviePlayerController = MPMoviePlayerController()
-    var audioPlayer : AVAudioPlayer! = nil // will be Optional, must supply initializer
+    var bookInfo: BookInfo! = nil
+    
+    // player
+    var audioPlayer:AVAudioPlayer!
     
     var startPlayFlag: Bool = false
     
@@ -39,7 +39,7 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     var uartService: CBService?
     
     // book page message
-    var BLEName:NSString! = ""
+    var BLEName:NSString! = ""      // passed by PlayUITableViewController
     let BLEPageMsgStart:NSString! = ":"
     let BLEPageMsgEnd:NSString! = "#"
     
@@ -59,6 +59,36 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        // retrieve book info, one to one mapping on Parse
+        var query = PFQuery(className: "device2book")
+        query.whereKey("BLEName", equalTo:self.BLEName)
+        var error:NSError?
+        let deviceObjects: [PFObject] = query.findObjects(&error) as [PFObject]
+        if error == nil && deviceObjects.count != 0 {
+            let deviceObject: PFObject! = deviceObjects.first
+            let bookID:String = deviceObject.objectForKey("bookID") as String
+            
+            var bookQuery = PFQuery(className: "book")
+            query.whereKey("objectID", equalTo:bookID)
+            var error:NSError?
+            let bookObjects: [PFObject] = bookQuery.findObjects(&error) as [PFObject]
+            if error == nil && bookObjects.count != 0 {
+                let bookObject: PFObject! = bookObjects.first
+                // create a new BookInfo object
+                var bookTitle: String = bookObject.objectForKey("title") as String
+                var bookDescription: String = bookObject.objectForKey("description") as String
+                var bookPagesNum: Int = bookObject.objectForKey("pagesNum") as Int
+                var bookCoverImagePF: PFFile = bookObject.objectForKey("coverImage") as PFFile
+                var bookImageData: NSData = bookCoverImagePF.getData() as NSData
+                var bookCoverImage: UIImage? = UIImage(data: bookImageData)
+                self.bookInfo = BookInfo(title: bookTitle, description: bookDescription, coverImage: bookCoverImage, pagesNum: bookPagesNum)
+            } else {
+                self.PlayItemPageStatus.text = "ERROR: retrieve book from server"
+            }
+        } else {
+            self.PlayItemPageStatus.text = "ERROR: book name mapping"
+        }
+        
         // alignment
         self.PlayItemPageStatus.textAlignment = NSTextAlignment.Center
         self.PlayItemPageStatus.sizeToFit()
@@ -68,31 +98,24 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
         self.PlayItemPageIndex.sizeToFit()
         self.PlayItemPageImg.sizeToFit()
         
-        // text
-        self.PlayItemPageStatus.text = "connect to book ..."
-        self.PlayItemPageStatus.backgroundColor = UIColor.redColor()
-        self.PlayItemPageStatus.textColor = UIColor.whiteColor()
-        //self.PlayItemPageTitle.text = albumInfo.title
-        self.PlayItemPageTitle.text = BLEName
-        self.PlayItemPageIndex.text = "0/10"
+        // book info display
+        if self.bookInfo != nil {
+            // TEXTS
+            self.PlayItemPageStatus.text = "connect to book ..."
+            self.PlayItemPageStatus.backgroundColor = UIColor.redColor()
+            self.PlayItemPageStatus.textColor = UIColor.whiteColor()
+            //self.PlayItemPageTitle.text = albumInfo.title
+            self.PlayItemPageTitle.text = self.bookInfo.title
+            self.PlayItemPageIndex.text = "0/\(self.bookInfo.pagesNum)"
+            
+            // COVERIMAGE
+            /*let urlString = "http://www.readingforpleasure.net/wp-content/uploads/2012/01/cat-reading-book.jpg"
+            let imgURL: NSURL = NSURL(string: urlString)!
+            // Download an NSData representation of the image at the URL
+            let imgData: NSData = NSData(contentsOfURL: imgURL)!*/
+            self.PlayItemPageImg.image = self.bookInfo.coverImage?
+        }
         
-        // load image
-        //self.PlayItemPageImg?.image = UIImage(named: "Blank52")
-        
-        // Grab the artworkUrl60 key to get an image URL for the app's thumbnail
-        //let urlString = albumInfo.largeImageURL
-        let urlString = "http://www.readingforpleasure.net/wp-content/uploads/2012/01/cat-reading-book.jpg"
-        let imgURL: NSURL = NSURL(string: urlString)!
-        // Download an NSData representation of the image at the URL
-        let imgData: NSData = NSData(contentsOfURL: imgURL)!
-        self.PlayItemPageImg?.image = UIImage(data: imgData)
-        
-        // get collection id and play song
-        //UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-        //ItunesAPI.lookupAlbum(self.albumInfo.collectionId)
-        
-        // play flag
-        self.startPlayFlag = false
     }
     
     override func didReceiveMemoryWarning() {
