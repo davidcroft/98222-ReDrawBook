@@ -10,7 +10,7 @@ import UIKit
 import CoreBluetooth
 import AVFoundation
 
-class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate {
+class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, AVAudioPlayerDelegate {
     
     @IBOutlet var PlayItemPageStatus: UILabel!
     @IBOutlet var PlayItemPageTitle: UILabel!
@@ -21,8 +21,6 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     
     // player
     var audioPlayer:AVAudioPlayer!
-    
-    var startPlayFlag: Bool = false
     
     // bluetooth
     let serviceUUID = CBUUID(string: "6e400001-b5a3-f393-e0a9-e50e24dcca9e")
@@ -38,17 +36,17 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     var rxCharacteristic: CBCharacteristic?
     var uartService: CBService?
     
-    // book page message
+    // book info
     var BLEName:NSString! = ""      // passed by PlayUITableViewController
     let BLEPageMsgStart:NSString! = ":"
     let BLEPageMsgEnd:NSString! = "#"
     
+    // book page recognition
     var pageIndexCurr:Int! = 0
     var pageIndexTemp:Int! = 0
     var pageRecogCountFlag:Bool = false
     var pageRecogCounter:Int! = 0
     let pageRecogCounterInit = 2
-    var isPlaying:Bool = false
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -230,12 +228,13 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     func peripheral(peripheral: CBPeripheral!, didUpdateValueForCharacteristic characteristic: CBCharacteristic!, error: NSError!) {
         //NSLog("Did Update Value For Characteristic")
         if error == nil {
+            
             // create a new thread to read characters
             dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
                 if (characteristic == self.rxCharacteristic) {
                     //NSLog("Recieved: \(characteristic.value)")
                     let rxStr:NSString! = NSString(data: characteristic.value, encoding:NSUTF8StringEncoding)
-                    //NSLog("Received value is \(rxStr)")
+                    NSLog("Received value is \(rxStr)")
                     let pageIndex:Int = self.readBookPage(rxStr)
                     if pageIndex >= 0 {
                         // if pageIndex is not identical with current page index, activate a new update process
@@ -245,10 +244,12 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
                             self.pageRecogCountFlag = true
                             self.pageRecogCounter = self.pageRecogCounterInit
                             self.pageIndexTemp = pageIndex
+                            return
                         }
                         else if self.pageRecogCountFlag {
                             //println("during a recognition")
                             self.pageRecognition(pageIndex)
+                            return
                         }
                     }
                 }
@@ -325,11 +326,21 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
                         self.PlayItemPageStatus.text = "play sound track on page \(self.pageIndexCurr)"
                         self.PlayItemPageStatus.backgroundColor = UIColor(red: 0.298, green: 0.851, blue: 0.3922, alpha: 1.0)
                         self.PlayItemPageIndex.text = "\(self.pageIndexCurr)/20"
+                        
+                        // play audio from server
+                        println("play audio fron server")
+                        self.playAudioOnServerFromIndex(self.pageIndexCurr)
+                        
                     } else {
                         // page == 0
                         self.PlayItemPageStatus.text = "waiting for touch event on paper ..."
                         self.PlayItemPageStatus.backgroundColor = UIColor.redColor()
                         self.PlayItemPageIndex.text = "\(self.pageIndexCurr)/20"
+                        
+                        // stop audio player
+                        if (self.audioPlayer != nil && self.audioPlayer.playing) {
+                            self.audioPlayer.stop()
+                        }
                     }
                 })
             } else {
@@ -345,56 +356,67 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
         }
     }
     
-    func playAudio(pageIndex: Int!) {
-        if(pageIndex == 0) {
-            audioPlayer.stop()
-            self.isPlaying = false;
-            NSLog("stop play audio")
-            self.PlayItemPageStatus.text = "waiting for touch event on paper ..."
-            self.PlayItemPageStatus.backgroundColor = UIColor.redColor()
-            self.PlayItemPageStatus.textColor = UIColor.whiteColor()
-        }
-        else if(pageIndex > 0) {
-            if(!self.isPlaying) {
-                // audio player
-                /*var path = NSBundle.mainBundle().pathForResource("page1Audio", ofType:"mp3")
-                switch pageIndex {
-                case 1:
-                    path = NSBundle.mainBundle().pathForResource("page1Audio", ofType:"mp3")
-                case 2:
-                    path = NSBundle.mainBundle().pathForResource("page2Audio", ofType:"mp3")
-                case 3:
-                    path = NSBundle.mainBundle().pathForResource("page3Audio", ofType:"mp3")
-                case 4:
-                    path = NSBundle.mainBundle().pathForResource("page4Audio", ofType:"mp3")
-                case 5:
-                    path = NSBundle.mainBundle().pathForResource("page5Audio", ofType:"mp3")
-                case 6:
-                    path = NSBundle.mainBundle().pathForResource("page6Audio", ofType:"mp3")
-                case 7:
-                    path = NSBundle.mainBundle().pathForResource("page7Audio", ofType:"mp3")
-                case 8:
-                    path = NSBundle.mainBundle().pathForResource("page8Audio", ofType:"mp3")
-                default:
-                    path = NSBundle.mainBundle().pathForResource("page1Audio", ofType:"mp3")
-                }*/
-                NSLog("play audio \(pageIndex)")
+    func playAudioOnServerFromIndex(pageIndex: Int!) {
+        // create a new thread to play audio  QOS_CLASS_USER_INITIATED
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), { () -> Void in
+            
+            // Removed deprecated use of AVAudioSessionDelegate protocol
+            AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, error: nil)
+            AVAudioSession.sharedInstance().setActive(true, error: nil)
+            
+            // retrieve audio track and play, pageIndex in server starts from 1 instead of 0
+            var query = PFQuery(className: "soundtracks")
+            // generate the audioName of clicked page for query (username-bookTitle-pageIndex.m4a)
+            query.whereKey("audioName", equalTo:"username-\(self.bookInfo.title)-Page\(self.pageIndexCurr).m4a")
+            var error: NSError?
+            let userAudioObjects: [PFObject] = query.findObjects(&error) as [PFObject]
+            if error == nil && userAudioObjects.count != 0 {
+                // has record in the server
+                let userAudioObject: PFObject! = userAudioObjects.first
+                let audioFile: PFFile! = userAudioObject.objectForKey("audioFile") as PFFile
+                let recordURL: NSURL = NSURL(string: audioFile.url)!
+                let recordData: NSData = NSData(contentsOfURL: recordURL)!
+                var error: NSError?
                 
-                //let fileURL = NSURL(fileURLWithPath: path!)
-                //audioPlayer = AVAudioPlayer(contentsOfURL: fileURL, error: nil)
-                //audioPlayer.prepareToPlay()
-                //audioPlayer.play()
-                self.isPlaying = true
+                // play remote audio with URL, use AVAudioPlayer(data: recordData, error: &error)
+                
+                self.audioPlayer = AVAudioPlayer(data: recordData, error: &error)
+                if self.audioPlayer == nil {
+                    if let e = error {
+                        println(e.localizedDescription)
+                        return
+                    }
+                }
+                self.audioPlayer.delegate = self
+                self.audioPlayer.prepareToPlay()
+                self.audioPlayer.volume = 1.0
+                self.audioPlayer.play()
+                
+                // update play meter
+                /*self.startPlayIndex = indexPath.row + 1
+                self.playMeterTimer = NSTimer.scheduledTimerWithTimeInterval(0.1,
+                target:self,
+                selector:"updateAudioPlayMeter:",
+                userInfo:nil,
+                repeats:true)*/
+            } else {
+                self.PlayItemPageStatus.text = "no record in server or retrieve page audio error"
             }
-            self.PlayItemPageStatus.text = "play sound track on page \(pageIndex)"
-            self.PlayItemPageStatus.backgroundColor = UIColor.greenColor()
-            self.PlayItemPageStatus.textColor = UIColor.whiteColor()
-        }
+        })
     }
     
+    // MARK: AVAudioPlayerDelegate
+    func audioPlayerDidFinishPlaying(player: AVAudioPlayer!, successfully flag: Bool) {
+        println("finished playing \(flag)")
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(player: AVAudioPlayer!, error: NSError!) {
+        println("\(error.localizedDescription)")
+    }
+
     /*
     // MARK: - Navigation
-    
+
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue!, sender: AnyObject!) {
     // Get the new view controller using segue.destinationViewController.
