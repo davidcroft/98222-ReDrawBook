@@ -228,11 +228,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438996095.688795"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "763"
-            endingLineNumber = "763"
+            startingLineNumber = "833"
+            endingLineNumber = "833"
             landmarkName = "RecordItemViewController"
             landmarkType = "3">
          </BreakpointContent>
@@ -434,13 +434,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995927.299915"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "749"
-            endingLineNumber = "749"
-            landmarkName = "audioPlayerDidFinishPlaying(_:successfully:)"
-            landmarkType = "5">
+            startingLineNumber = "819"
+            endingLineNumber = "819"
+            landmarkName = "RecordItemViewController"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -450,11 +450,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995865.04155"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "638"
-            endingLineNumber = "638"
+            startingLineNumber = "681"
+            endingLineNumber = "681"
             landmarkName = "uploadAudioTrack()"
             landmarkType = "5">
             <Locations>
@@ -465,11 +465,11 @@
                   symbolName = "ReDrawBook2.RecordItemViewController.uploadAudioTrack (ReDrawBook2.RecordItemViewController)() -&gt; ()"
                   moduleName = "ReDrawBook2"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
-                  timestampString = "438995125.581758"
+                  timestampString = "438998424.357372"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "629"
-                  endingLineNumber = "629"
+                  startingLineNumber = "677"
+                  endingLineNumber = "677"
                   offsetFromSymbolStart = "372">
                </Location>
                <Location
@@ -479,11 +479,11 @@
                   symbolName = "ReDrawBook2.RecordItemViewController.uploadAudioTrack (ReDrawBook2.RecordItemViewController)() -&gt; ()"
                   moduleName = "ReDrawBook2"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
-                  timestampString = "438995125.581886"
+                  timestampString = "438998424.357555"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "629"
-                  endingLineNumber = "629"
+                  startingLineNumber = "677"
+                  endingLineNumber = "677"
                   offsetFromSymbolStart = "1916">
                </Location>
             </Locations>
@@ -496,11 +496,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995865.04155"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "686"
-            endingLineNumber = "686"
+            startingLineNumber = "729"
+            endingLineNumber = "729"
             landmarkName = "uploadAudioTrack()"
             landmarkType = "5">
          </BreakpointContent>
@@ -512,11 +512,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995865.04155"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "656"
-            endingLineNumber = "656"
+            startingLineNumber = "699"
+            endingLineNumber = "699"
             landmarkName = "uploadAudioTrack()"
             landmarkType = "5">
          </BreakpointContent>
@@ -528,11 +528,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995865.04155"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "678"
-            endingLineNumber = "678"
+            startingLineNumber = "721"
+            endingLineNumber = "721"
             landmarkName = "uploadAudioTrack()"
             landmarkType = "5">
          </BreakpointContent>
@@ -544,11 +544,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995865.04155"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "644"
-            endingLineNumber = "644"
+            startingLineNumber = "687"
+            endingLineNumber = "687"
             landmarkName = "uploadAudioTrack()"
             landmarkType = "5">
          </BreakpointContent>
@@ -768,11 +768,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995865.04155"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "726"
-            endingLineNumber = "726"
+            startingLineNumber = "796"
+            endingLineNumber = "796"
             landmarkName = "updatePageLength()"
             landmarkType = "5">
          </BreakpointContent>
@@ -816,11 +816,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ReDrawBook2/RecordItemViewController.swift"
-            timestampString = "438995865.04155"
+            timestampString = "438998503.924041"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "730"
-            endingLineNumber = "730"
+            startingLineNumber = "800"
+            endingLineNumber = "800"
             landmarkName = "updatePageLength()"
             landmarkType = "5">
          </BreakpointContent>
@@ -900,6 +900,38 @@
             startingLineNumber = "126"
             endingLineNumber = "126"
             landmarkName = "updateAudioPlayMeter(_:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ReDrawBook2/RecordItemViewController.swift"
+            timestampString = "438998182.309461"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "430"
+            endingLineNumber = "430"
+            landmarkName = "tableView(_:editActionsForRowAtIndexPath:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ReDrawBook2/RecordItemViewController.swift"
+            timestampString = "438998503.924041"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "462"
+            endingLineNumber = "462"
+            landmarkName = "tableView(_:editActionsForRowAtIndexPath:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

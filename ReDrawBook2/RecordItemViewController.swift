@@ -408,6 +408,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     
     func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [AnyObject]? {
         
+        let page = pages[indexPath.row]
+    
         var moreRowAction = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "More", handler:{action, indexpath in
             println("MORE•ACTION");
 
@@ -416,26 +418,67 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             /*let actionSheetMore = UIActionSheet(title: "More", delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: nil, otherButtonTitles: "Delete Aduio in Server", "Download Locally")
             actionSheetMore.showInView(self.view)*/
             
-            //
-            let alertController = UIAlertController(title: "More", message: "00:00", preferredStyle: .ActionSheet)
+            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
             let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
-            let callAction = UIAlertAction(title: "Delete Audio in Server", style: .Default, handler: {
+            let deleteAction = UIAlertAction(title: "Delete Audio in Server", style: .Destructive, handler:{
                 action in
-                //let alertMessage = UIAlertController(title: "Service Unavailable", message: "Sorry, the call feature is not available yet. Please retry later.", preferredStyle: .Alert)
-                //alertMessage.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
-                alertController.setValue("00:01", forKey: "message")
-                self.presentViewController(alertController, animated: true, completion: nil)
+                //alertController.setValue("00:01", forKey: "message")
+                // find object in server
+                let audioName = "username-\(self.bookInfo.title)-Page\(page.pageIndex).m4a"
+                let deleteRes = self.deleteBlockForAudioTrack(audioName)
+                
+                if deleteRes == 0 {
+                    // delete succeed
+                    let alertControllerMsg = UIAlertController(title: nil, message: "Delete Succeed", preferredStyle: .Alert)
+                    // dismiss view controller automatically in a 1s
+                    self.presentViewController(alertControllerMsg, animated: true, completion: { () -> Void in
+                        // set a timer for notification
+                        self.tempTimer = NSTimer.scheduledTimerWithTimeInterval(1.5,
+                            target:self,
+                            selector:"updateTempTimer:",
+                            userInfo:nil,
+                            repeats:false)
+                    })
+                    // upload page info (length) and reload page
+                    self.updatePageLength()
+                    
+                } else if deleteRes > 0 {
+                    // delete fail
+                    let alertControllerMsg = UIAlertController(title: nil, message: "Delete Fail", preferredStyle: .Alert)
+                    // dismiss view controller automatically in a 1s
+                    self.presentViewController(alertControllerMsg, animated: true, completion: { () -> Void in
+                        // set a timer for notification
+                        self.tempTimer = NSTimer.scheduledTimerWithTimeInterval(1.5,
+                            target:self,
+                            selector:"updateTempTimer:",
+                            userInfo:nil,
+                            repeats:false)
+                    })
+                    // do not need to upload page info (length) but reload page
+                    self.RecordItemPageTableView.reloadData()
+                    
+                } else if deleteRes < 0 {
+                    // cannot find record in server
+                    let alertControllerMsg = UIAlertController(title: nil, message: "No Record in Server", preferredStyle: .Alert)
+                    // dismiss view controller automatically in a 1s
+                    self.presentViewController(alertControllerMsg, animated: true, completion: { () -> Void in
+                        // set a timer for notification
+                        self.tempTimer = NSTimer.scheduledTimerWithTimeInterval(1.5,
+                            target:self,
+                            selector:"updateTempTimer:",
+                            userInfo:nil,
+                            repeats:false)
+                    })
+                    // do not need to upload page info (length) but reload page
+                    self.RecordItemPageTableView.reloadData()
                 }
-            )
-            alertController.addAction(callAction)
+            })
+            
+            alertController.addAction(deleteAction)
             alertController.addAction(cancelAction)
             self.presentViewController(alertController, animated: true, completion: nil)
         });
         moreRowAction.backgroundColor = UIColor(red: 0.298, green: 0.851, blue: 0.3922, alpha: 1.0);
-        
-        var deleteRowAction = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "Delete", handler:{action, indexpath in
-            println("DELETE•ACTION");
-        });
         
         var recordRowAction = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "Record", handler:{action, indexpath in
             println("RECORD•ACTION");
@@ -683,7 +726,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                                 }
                             }
                             // alert controller
-                            let alertController = UIAlertController(title: "Upload finished!", message: "", preferredStyle: .Alert)
+                            let alertController = UIAlertController(title: "Upload finished!", message: nil, preferredStyle: .Alert)
                             // dismiss view controller automatically in a 1s
                             self.presentViewController(alertController, animated: true, completion: { () -> Void in
                                 // upload page info (length) and reload page
@@ -707,8 +750,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     func queryBlockForAudioTrackLength(audioName: String) -> String {
         let queryAudio = PFQuery(className: "soundtracks")
         queryAudio.whereKey("audioName", equalTo:audioName)
-        var error: NSError
-        let userAudioObjects: [PFObject] = queryAudio.findObjects() as [PFObject]
+        var error: NSError?
+        let userAudioObjects: [PFObject] = queryAudio.findObjects(&error) as [PFObject]
         var pageLength: String
         if userAudioObjects.count != 0 {
             let userAudioObject: PFObject = userAudioObjects.first!
@@ -717,6 +760,33 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             pageLength = "00:00"
         }
         return pageLength
+    }
+    
+    // return 0-delete succeed; 1-delete false; -1-cannot find file in the server
+    func deleteBlockForAudioTrack(audioName: String) -> Int {
+        let queryAudio = PFQuery(className: "soundtracks")
+        queryAudio.whereKey("audioName", equalTo:audioName)
+        var error: NSError
+        let userAudioObjects: [PFObject] = queryAudio.findObjects() as [PFObject]
+        var pageLength: String
+        if userAudioObjects.count != 0 {
+            for userAudioObject in userAudioObjects {
+                var error:NSError?
+                userAudioObject.delete(&error)
+                if error == nil {
+                    // delete succeed
+                    continue
+                } else {
+                    // delete fail
+                    println(error)
+                    return 1
+                }
+            }
+        } else {
+            // cannot find record in server
+            return -1
+        }
+        return 0
     }
     
     func updatePageLength() {
