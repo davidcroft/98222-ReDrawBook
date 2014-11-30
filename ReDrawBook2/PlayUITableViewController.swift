@@ -9,14 +9,14 @@
 import UIKit
 import CoreBluetooth
 
-class PlayUITableViewController: UITableViewController, UITableViewDataSource, ItunesAPIControllerProtocol, CBCentralManagerDelegate {
-    
-    var albums = [AlbumInfo]()
-    var itunesAPI:ItunesAPIController?
+class PlayUITableViewController: UITableViewController, UITableViewDataSource, CBCentralManagerDelegate {
+
+    // book info
+    var books = [String: BookInfo]()
     
     //var peripheralManager: CBPeripheralManager!
     var centralManager: CBCentralManager!
-    var peripehralNameList:[NSString] = []
+    var peripehralNameList:[String] = []
     let serviceUUID = CBUUID(string: "6e400001-b5a3-f393-e0a9-e50e24dcca9e")
     
     required init(coder aDecoder: NSCoder) {
@@ -27,16 +27,8 @@ class PlayUITableViewController: UITableViewController, UITableViewDataSource, I
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        itunesAPI = ItunesAPIController(delegate: self)
         // turn on network activity
         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-        itunesAPI!.searchItunesFor("Jason Mraz")
-        
-        // bluetooth init
-        //centralManager = CBCentralManager(delegate: self, queue: nil)
-        
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
         
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
@@ -45,24 +37,43 @@ class PlayUITableViewController: UITableViewController, UITableViewDataSource, I
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("PlayItem") as? PlayTableViewCell ?? PlayTableViewCell()
         
-        /*let album = self.albums[indexPath.row]
-        cell.PlayItemTitle?.text = album.title
-        cell.PlayItemDesp?.text = album.artistName
-        cell.PlayItemThumb?.image = UIImage(named: "Blank52")
+        let BLEName = self.peripehralNameList[indexPath.row]
         
-        // Grab the artworkUrl60 key to get an image URL for the app's thumbnail
-        let urlString = album.thumbnailImageURL
-        let imgURL: NSURL = NSURL(string: urlString)!
-        // Download an NSData representation of the image at the URL
-        let imgData: NSData = NSData(contentsOfURL: imgURL)!
-        cell.PlayItemThumb?.image = UIImage(data: imgData)*/
+        // retrieve book info, one to one mapping on Parse
+        var query = PFQuery(className: "device2book")
+        query.whereKey("BLEName", equalTo:BLEName)
+        var error:NSError?
+        let deviceObjects: [PFObject] = query.findObjects(&error) as [PFObject]
+        if error == nil && deviceObjects.count != 0 {
+            let deviceObject: PFObject! = deviceObjects.first
+            let bookID:String = deviceObject.objectForKey("bookID") as String
+            
+            var bookQuery = PFQuery(className: "book")
+            query.whereKey("objectID", equalTo:bookID)
+            var error:NSError?
+            let bookObjects: [PFObject] = bookQuery.findObjects(&error) as [PFObject]
+            if error == nil && bookObjects.count != 0 {
+                let bookObject: PFObject! = bookObjects.first
+                // create a new BookInfo object
+                var bookTitle: String = bookObject.objectForKey("title") as String
+                var bookDescription: String = bookObject.objectForKey("description") as String
+                var bookPagesNum: Int = bookObject.objectForKey("pagesNum") as Int
+                var bookCoverImagePF: PFFile = bookObject.objectForKey("coverImage") as PFFile
+                var bookImageData: NSData = bookCoverImagePF.getData() as NSData
+                var bookCoverImage: UIImage? = UIImage(data: bookImageData)
+                self.books[BLEName] = BookInfo(title: bookTitle, description: bookDescription, coverImage: bookCoverImage, pagesNum: bookPagesNum)
+            } else {
+                println("ERROR: retrieve book from server")
+            }
+        } else {
+            println("ERROR: book name mapping")
+        }
         
-        
-        let album = self.peripehralNameList[indexPath.row]
-        cell.PlayItemTitle?.text = album
-        cell.PlayItemDesp?.text = "this is a description"
-        
-        cell.PlayItemThumb?.image = UIImage(named:"bookThumbDefault.jpg")
+        let bookInfo: BookInfo? = books[BLEName]
+        cell.PlayItemTitle?.text = bookInfo?.title
+        cell.PlayItemDesp?.text = bookInfo?.description
+        cell.PlayItemThumb?.image = bookInfo?.coverImage
+
         // turn the image to round
         cell.PlayItemThumb.layer.cornerRadius = cell.PlayItemThumb.bounds.size.height / 2.0
         cell.PlayItemThumb.clipsToBounds = true // very important, not mask the image otherwise
@@ -75,16 +86,6 @@ class PlayUITableViewController: UITableViewController, UITableViewDataSource, I
         return self.peripehralNameList.count
     }
     
-    func didReceiveAPIResults(results: NSDictionary) {
-        var resultsArr: NSArray = results["results"] as NSArray
-        dispatch_async(dispatch_get_main_queue(), {
-            self.albums = AlbumInfo.albumsWithJSON(resultsArr)
-            self.tableView!.reloadData()
-            // turn off network activity
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-        })
-    }
-    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         switch segue.identifier! {
         case "AlbumToDisplay":
@@ -95,6 +96,7 @@ class PlayUITableViewController: UITableViewController, UITableViewDataSource, I
                     //secondViewController.albumInfo = selectedAlbum
                     var selectedAlbum = self.peripehralNameList[albumIndex]
                     secondViewController.BLEName = selectedAlbum
+                    secondViewController.bookInfo = books[selectedAlbum]
                 }
             }
         default:

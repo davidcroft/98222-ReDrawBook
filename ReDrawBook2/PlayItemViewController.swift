@@ -17,7 +17,7 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     @IBOutlet var PlayItemPageIndex: UILabel!
     @IBOutlet var PlayItemPageImg: UIImageView!
     
-    var bookInfo: BookInfo! = nil
+    var bookInfo: BookInfo!
     
     // player
     var audioPlayer:AVAudioPlayer!
@@ -56,36 +56,6 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        
-        // retrieve book info, one to one mapping on Parse
-        var query = PFQuery(className: "device2book")
-        query.whereKey("BLEName", equalTo:self.BLEName)
-        var error:NSError?
-        let deviceObjects: [PFObject] = query.findObjects(&error) as [PFObject]
-        if error == nil && deviceObjects.count != 0 {
-            let deviceObject: PFObject! = deviceObjects.first
-            let bookID:String = deviceObject.objectForKey("bookID") as String
-            
-            var bookQuery = PFQuery(className: "book")
-            query.whereKey("objectID", equalTo:bookID)
-            var error:NSError?
-            let bookObjects: [PFObject] = bookQuery.findObjects(&error) as [PFObject]
-            if error == nil && bookObjects.count != 0 {
-                let bookObject: PFObject! = bookObjects.first
-                // create a new BookInfo object
-                var bookTitle: String = bookObject.objectForKey("title") as String
-                var bookDescription: String = bookObject.objectForKey("description") as String
-                var bookPagesNum: Int = bookObject.objectForKey("pagesNum") as Int
-                var bookCoverImagePF: PFFile = bookObject.objectForKey("coverImage") as PFFile
-                var bookImageData: NSData = bookCoverImagePF.getData() as NSData
-                var bookCoverImage: UIImage? = UIImage(data: bookImageData)
-                self.bookInfo = BookInfo(title: bookTitle, description: bookDescription, coverImage: bookCoverImage, pagesNum: bookPagesNum)
-            } else {
-                self.PlayItemPageStatus.text = "ERROR: retrieve book from server"
-            }
-        } else {
-            self.PlayItemPageStatus.text = "ERROR: book name mapping"
-        }
         
         // alignment
         self.PlayItemPageStatus.textAlignment = NSTextAlignment.Center
