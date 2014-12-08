@@ -36,6 +36,13 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     var rxCharacteristic: CBCharacteristic?
     var uartService: CBService?
     
+    /*enum ConnectionStatus {
+        case Disconnected
+        case Scanning
+        case Connected
+    }
+    var connectionStatus: ConnectionStatus = ConnectionStatus.Disconnected*/
+    
     // book info
     var BLEName:NSString! = ""      // passed by PlayUITableViewController
     let BLEPageMsgStart:NSString! = ":"
@@ -103,11 +110,43 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     func centralManagerDidUpdateState(central: CBCentralManager!) {
         if central.state == .PoweredOn {
             NSLog("central on")
-            // scanning
-            centralManager.scanForPeripheralsWithServices([self.serviceUUID!], options: [CBCentralManagerScanOptionAllowDuplicatesKey:false])
+            
+            // retrieve connected peripherals
+            let connectedPeripherals = centralManager.retrieveConnectedPeripheralsWithServices([self.serviceUUID!])
+            
+            if connectedPeripherals.count > 0 {
+                // disconnect all peripehrals
+                for connectedPeripheral in connectedPeripherals {
+                    NSLog("Already connected ...")
+                    centralManager.cancelPeripheralConnection(connectedPeripheral as CBPeripheral)
+                }
+                // scanning for desired one
+                centralManager.scanForPeripheralsWithServices([self.serviceUUID!], options: [CBCentralManagerScanOptionAllowDuplicatesKey:false])
+            } else {
+                NSLog("Scan for Peripherials")
+                // scanning
+                centralManager.scanForPeripheralsWithServices([self.serviceUUID!], options: [CBCentralManagerScanOptionAllowDuplicatesKey:false])
+            }
+            
+        } else if central.state == .PoweredOff {
+            NSLog("central off!")
+            //self.connectionStatus = ConnectionStatus.Disconnected
+            self.disconnect()
         }
     }
     
+    // disconnect peripherals
+    func disconnect()
+    {
+        if self.peripheral == nil {
+            NSLog("Asked to disconnect, but no current connection!")
+            return
+        }
+        NSLog("Disconnect ...")
+        self.centralManager.cancelPeripheralConnection(self.peripheral)
+    }
+
+
     // Invoked when the central manager discovers a peripheral while scanning
     func centralManager(central: CBCentralManager!, didDiscoverPeripheral peripheral: CBPeripheral!, advertisementData: [NSObject : AnyObject]!, RSSI: NSNumber!) {
         var periName:NSString! = peripheral!.valueForKey("name") as NSString

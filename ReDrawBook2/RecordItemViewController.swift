@@ -18,6 +18,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     @IBOutlet var RecordItemPageTitle: UILabel!
     @IBOutlet var RecordItemPageDesp: UILabel!
     @IBOutlet var RecordItemPageTableView: UITableView!
+    @IBOutlet var LoadingIndicator: UIActivityIndicatorView!
     
     var bookInfo: BookInfo!
     var pages:[PageInfo] = []
@@ -56,6 +57,9 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         self.RecordItemPageImg.image = self.bookInfo.coverImage?
         //self.RecordItemPageImg.image = UIImage(data: NSData(contentsOfURL: NSURL(string: self.albumInfo!.largeImageURL)!)!)
         
+        // start loading indicator
+        self.startLoadingIndicator()
+        
         // get all the pages info, display
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), { () -> Void in
             var query = PFQuery(className: "page")
@@ -88,11 +92,15 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                             self.pages.append(newPageItem)
                             })*/
                             self.pages.append(newPageItem)
-                            
-                            self.RecordItemPageTableView.rowHeight = 50
-                            self.RecordItemPageTableView.reloadData()
                         }
                     }
+                    
+                    // reload table view
+                    self.RecordItemPageTableView.rowHeight = 50
+                    self.RecordItemPageTableView.reloadData()
+                    
+                    // stop loading indicator
+                    self.stopLoadingIndicator()
                 }
             }
         })
@@ -187,8 +195,11 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+
+        // ############## //
+        //  is recording  //
+        // ############## //
         if (self.startRecIndex > 0) {
-            // is recording
             let cell = tableView.dequeueReusableCellWithIdentifier("AlbumItem") as?
                 RecordAlbumTableViewCell ?? RecordAlbumTableViewCell()
             
@@ -313,12 +324,14 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             self.presentViewController(alertController, animated: true, completion: nil)
         }
         
-        ////////////////
-        ////////////////
+        // ########### //
+        //   PLAYING   //
+        // ########### //
         else {
             // not recording, play audio after click on corresponding table view cell
             let cell = tableView.dequeueReusableCellWithIdentifier("AlbumItem") as?
                 RecordAlbumTableViewCell ?? RecordAlbumTableViewCell()
+            let page = pages[indexPath.row]
             
             // stop recording (should never be true)
             if self.recorder != nil {
@@ -329,8 +342,21 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             if self.player != nil && self.player.playing {
                 self.player.stop()
                 self.playMeterTimer.invalidate()
+                
+                // check stop playing or play another record
+                if self.startPlayIndex == page.pageIndex {
+                    // stop playing
+                    self.clearPlayIndex()
+                    return
+                }
+                
+                // play another track
                 self.clearPlayIndex()
+                
             }
+            
+            // start loading indicator
+            self.startLoadingIndicator()
             
             // retrieve audio track and play, pageIndex in server starts from 1 instead of 0
             let pageIndex:String = String(indexPath.row + 1)
@@ -386,9 +412,12 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                         self.presentViewController(alertController, animated: true, completion: nil)
                     }
                 }
+                
+                // stop loading indicator
+                self.stopLoadingIndicator()
+                
             }
         }
-        
     }
 
     /////////////// swipe left to appear buttons /////////////
@@ -422,6 +451,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
             let deleteAction = UIAlertAction(title: "Delete Audio in Server", style: .Destructive, handler:{
                 action in
+                
                 //alertController.setValue("00:01", forKey: "message")
                 // find object in server
                 let audioName = "username-\(self.bookInfo.title)-Page\(page.pageIndex).m4a"
@@ -739,7 +769,44 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                                     repeats:false)
                             })
                         }
+                        
+                        ///////////////////////
+                        ////    UNDEBUG    ////
+                        ///////////////////////
+                        else {
+                            // upload fail, re-upload
+                            NSLog("Upload fail")
+                            // alert controller
+                            let alertController = UIAlertController(title: "Upload failed", message: nil, preferredStyle: .Alert)
+                            // cancel upload, delete local file
+                            let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler:{
+                                action in
+                                // delete all files in delete list
+                                var error:NSError?
+                                for deleteFile in self.deleteList {
+                                    if fileManager.fileExistsAtPath(deleteFile) {
+                                        if !fileManager.removeItemAtPath(deleteFile, error: &error) {
+                                            NSLog("could not remove file")
+                                        } else {
+                                            NSLog("remove file")
+                                        }
+                                        if let e = error {
+                                            println(e.localizedDescription)
+                                        }
+                                    }
+                                }
+                            })
+                            // retry upload, call uploadAudioTrack again
+                            let retryAction = UIAlertAction(title: "Retry", style: .Default, handler:{
+                                action in
+                                // set flag to true to re-upload
+                                self.uploadFlag = true      // might have some bugs here
+                                self.uploadAudioTrack()
+                            })
+                            self.presentViewController(alertController, animated: true, completion: nil)
+                        }
                     })
+                    
                     // set flag
                     self.uploadFlag = false
                 }
@@ -794,7 +861,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             // retrieve page audio length: block method
             let audioName = "username-\(self.bookInfo.title)-Page\(page.pageIndex).m4a"
             page.pageLength = self.queryBlockForAudioTrackLength(audioName)
-            println("\(page.pageIndex): \(page.pageLength)")
+            //println("\(page.pageIndex): \(page.pageLength)")
         }
         // reload page info
         self.RecordItemPageTableView.reloadData()
@@ -824,6 +891,22 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     
     func audioPlayerDecodeErrorDidOccur(player: AVAudioPlayer!, error: NSError!) {
         println("\(error.localizedDescription)")
+    }
+    
+    func startLoadingIndicator() {
+        // start loading indicator
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            self.LoadingIndicator.hidden = false
+            self.LoadingIndicator.startAnimating()
+        })
+    }
+    
+    func stopLoadingIndicator() {
+        // hide loading indicator
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            self.LoadingIndicator.stopAnimating()
+            self.LoadingIndicator.hidden = true
+        })
     }
 
 

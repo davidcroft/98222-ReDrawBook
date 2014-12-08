@@ -49,7 +49,7 @@ class PlayUITableViewController: UITableViewController, UITableViewDataSource, C
             let bookID:String = deviceObject.objectForKey("bookID") as String
             
             var bookQuery = PFQuery(className: "book")
-            query.whereKey("objectID", equalTo:bookID)
+            bookQuery.whereKey("bookID", equalTo:bookID)
             var error:NSError?
             let bookObjects: [PFObject] = bookQuery.findObjects(&error) as [PFObject]
             if error == nil && bookObjects.count != 0 {

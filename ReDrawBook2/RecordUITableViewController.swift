@@ -28,10 +28,11 @@ class RecordUITableViewController: UITableViewController, UITableViewDataSource,
                         for object in objects {
                             var bookTitle: String = object.objectForKey("title") as String
                             var bookDescription: String = object.objectForKey("description") as String
+                            var bookPagesNum: Int = object.objectForKey("pagesNum") as Int
                             var bookCoverImagePF: PFFile = object.objectForKey("coverImage") as PFFile
                             var bookImageData: NSData = bookCoverImagePF.getData() as NSData
                             var bookCoverImage: UIImage? = UIImage(data: bookImageData)
-                            var newBookItem:BookInfo = BookInfo(title: bookTitle, description: bookDescription, coverImage: bookCoverImage, pagesNum: 5)
+                            var newBookItem:BookInfo = BookInfo(title: bookTitle, description: bookDescription, coverImage: bookCoverImage, pagesNum: bookPagesNum)
                             /*dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 self.books.append(newBookItem)
                             })*/

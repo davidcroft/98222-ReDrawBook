@@ -172,11 +172,15 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="pOB-gg-9km">
+                                <rect key="frame" x="150" y="350" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                     <navigationItem key="navigationItem" id="aEo-zP-xTl"/>
                     <connections>
+                        <outlet property="LoadingIndicator" destination="pOB-gg-9km" id="Dla-e0-j0I"/>
                         <outlet property="RecordItemPageDesp" destination="V6C-yg-laN" id="qkj-BB-fuS"/>
                         <outlet property="RecordItemPageImg" destination="4uA-Ae-PE6" id="EwI-xc-agg"/>
                         <outlet property="RecordItemPageTableView" destination="NLI-xW-qAK" id="MLz-qu-QTH"/>

@@ -11,6 +11,10 @@
 		6C3BF90319ED770F00EA8D33 /* RecordUITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3BF90219ED770F00EA8D33 /* RecordUITableViewController.swift */; };
 		6C3BF90519ED838C00EA8D33 /* RecordItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3BF90419ED838C00EA8D33 /* RecordItemViewController.swift */; };
 		6C3BF90719ED86EE00EA8D33 /* RecordAlbumTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3BF90619ED86EE00EA8D33 /* RecordAlbumTableViewCell.swift */; };
+		6C5AE55A1A2BD4B000B12A1B /* button-record.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5AE5591A2BD4B000B12A1B /* button-record.png */; };
+		6C5AE55C1A2BD4DE00B12A1B /* button-play.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5AE55B1A2BD4DE00B12A1B /* button-play.png */; };
+		6C5AE55E1A2BD6B000B12A1B /* button-play@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5AE55D1A2BD6B000B12A1B /* button-play@2x.png */; };
+		6C5AE5601A2BD6C900B12A1B /* button-record@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6C5AE55F1A2BD6C900B12A1B /* button-record@2x.png */; };
 		6C70320E1A2145D80086FC3D /* bookThumbDefault.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 6C70320D1A2145D80086FC3D /* bookThumbDefault.jpg */; };
 		6C7032141A2146960086FC3D /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C7032101A2146960086FC3D /* Bolts.framework */; };
 		6C7032151A2146960086FC3D /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C7032111A2146960086FC3D /* Parse.framework */; };
@@ -37,8 +41,6 @@
 		6C713B4319ECD25100A4FF6C /* AlbumInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C713B4219ECD25100A4FF6C /* AlbumInfo.swift */; };
 		6C713B4519ECD89600A4FF6C /* PlayItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C713B4419ECD89600A4FF6C /* PlayItemViewController.swift */; };
 		6C713B4719ECE5D800A4FF6C /* AlbumTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C713B4619ECE5D800A4FF6C /* AlbumTrack.swift */; };
-		6CBC8F4419EDB3F400ED0C78 /* button-play.png in Resources */ = {isa = PBXBuildFile; fileRef = 6CBC8F4219EDB3F400ED0C78 /* button-play.png */; };
-		6CBC8F4519EDB3F400ED0C78 /* button-record.png in Resources */ = {isa = PBXBuildFile; fileRef = 6CBC8F4319EDB3F400ED0C78 /* button-record.png */; };
 		6CE8E7F51A21B70D0096AB65 /* BookInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CE8E7F41A21B70D0096AB65 /* BookInfo.swift */; };
 /* End PBXBuildFile section */
 
@@ -57,6 +59,10 @@
 		6C3BF90219ED770F00EA8D33 /* RecordUITableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordUITableViewController.swift; sourceTree = "<group>"; };
 		6C3BF90419ED838C00EA8D33 /* RecordItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordItemViewController.swift; sourceTree = "<group>"; };
 		6C3BF90619ED86EE00EA8D33 /* RecordAlbumTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordAlbumTableViewCell.swift; sourceTree = "<group>"; };
+		6C5AE5591A2BD4B000B12A1B /* button-record.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-record.png"; sourceTree = "<group>"; };
+		6C5AE55B1A2BD4DE00B12A1B /* button-play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-play.png"; sourceTree = "<group>"; };
+		6C5AE55D1A2BD6B000B12A1B /* button-play@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-play@2x.png"; sourceTree = "<group>"; };
+		6C5AE55F1A2BD6C900B12A1B /* button-record@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-record@2x.png"; sourceTree = "<group>"; };
 		6C70320D1A2145D80086FC3D /* bookThumbDefault.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = bookThumbDefault.jpg; sourceTree = "<group>"; };
 		6C7032101A2146960086FC3D /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Bolts.framework; sourceTree = "<group>"; };
 		6C7032111A2146960086FC3D /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
@@ -88,8 +94,6 @@
 		6C713B4219ECD25100A4FF6C /* AlbumInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumInfo.swift; sourceTree = "<group>"; };
 		6C713B4419ECD89600A4FF6C /* PlayItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayItemViewController.swift; sourceTree = "<group>"; };
 		6C713B4619ECE5D800A4FF6C /* AlbumTrack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumTrack.swift; sourceTree = "<group>"; };
-		6CBC8F4219EDB3F400ED0C78 /* button-play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-play.png"; sourceTree = "<group>"; };
-		6CBC8F4319EDB3F400ED0C78 /* button-record.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-record.png"; sourceTree = "<group>"; };
 		6CE8E7F41A21B70D0096AB65 /* BookInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookInfo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -218,9 +222,11 @@
 		6CBC8F4619EDB41700ED0C78 /* res */ = {
 			isa = PBXGroup;
 			children = (
+				6C5AE55F1A2BD6C900B12A1B /* button-record@2x.png */,
+				6C5AE55D1A2BD6B000B12A1B /* button-play@2x.png */,
+				6C5AE55B1A2BD4DE00B12A1B /* button-play.png */,
+				6C5AE5591A2BD4B000B12A1B /* button-record.png */,
 				6C70320D1A2145D80086FC3D /* bookThumbDefault.jpg */,
-				6CBC8F4219EDB3F400ED0C78 /* button-play.png */,
-				6CBC8F4319EDB3F400ED0C78 /* button-record.png */,
 			);
 			name = res;
 			sourceTree = "<group>";
@@ -306,12 +312,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6CBC8F4519EDB3F400ED0C78 /* button-record.png in Resources */,
+				6C5AE55E1A2BD6B000B12A1B /* button-play@2x.png in Resources */,
+				6C5AE5601A2BD6C900B12A1B /* button-record@2x.png in Resources */,
+				6C5AE55A1A2BD4B000B12A1B /* button-record.png in Resources */,
 				6C713B2019ECB41000A4FF6C /* Main.storyboard in Resources */,
-				6CBC8F4419EDB3F400ED0C78 /* button-play.png in Resources */,
 				6C70320E1A2145D80086FC3D /* bookThumbDefault.jpg in Resources */,
 				6C713B2519ECB41000A4FF6C /* LaunchScreen.xib in Resources */,
 				6C713B2219ECB41000A4FF6C /* Images.xcassets in Resources */,
+				6C5AE55C1A2BD4DE00B12A1B /* button-play.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
