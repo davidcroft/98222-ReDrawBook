@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>0FE10E2D-2C06-4640-A278-054C88312AD1</string>
+	<key>IDESourceControlProjectName</key>
+	<string>project</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>3D066146BDE05103C278A0F9605074A28C9CBFB8</key>
+		<string>https://github.com/davidcroft/09222-ReDrawBook.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>ReDrawBook2.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>3D066146BDE05103C278A0F9605074A28C9CBFB8</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/davidcroft/09222-ReDrawBook.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>3D066146BDE05103C278A0F9605074A28C9CBFB8</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>3D066146BDE05103C278A0F9605074A28C9CBFB8</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ReDrawBook2</string>
+		</dict>
+	</array>
+</dict>
+</plist>

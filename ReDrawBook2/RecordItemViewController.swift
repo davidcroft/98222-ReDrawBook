@@ -54,7 +54,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         // Do any additional setup after loading the view.
         self.RecordItemPageTitle.text = self.bookInfo.title
         self.RecordItemPageDesp.text = self.bookInfo.description
-        self.RecordItemPageImg.image = self.bookInfo.coverImage?
+        self.RecordItemPageImg.image = self.bookInfo.coverImage
         //self.RecordItemPageImg.image = UIImage(data: NSData(contentsOfURL: NSURL(string: self.albumInfo!.largeImageURL)!)!)
         
         // start loading indicator
@@ -69,11 +69,11 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                 (objects:[AnyObject]!, error: NSError!) ->Void in
                 if (error == nil) {
                     for object in objects {
-                        var bookName: String = object.objectForKey("bookName") as String
+                        var bookName: String = object.objectForKey("bookName") as! String
                         if (bookName == self.bookInfo.title) {
-                            var pageIndex: Int = object.objectForKey("pageIndex") as Int
-                            var pageTitle: String = object.objectForKey("pageTitle") as String
-                            var pageImagePF: PFFile? = object.objectForKey("pageImage") as PFFile?
+                            var pageIndex: Int = object.objectForKey("pageIndex") as! Int
+                            var pageTitle: String = object.objectForKey("pageTitle") as! String
+                            var pageImagePF: PFFile? = object.objectForKey("pageImage") as! PFFile?
                             var pageImageData: NSData? = pageImagePF?.getData() as NSData?
                             var pageCoverImage: UIImage!
                             if (pageImageData != nil ) {
@@ -369,8 +369,8 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                 if (error == nil) {
                     if objects.count != 0 {
                         // has record in the server
-                        let userObject:PFObject = objects.first as PFObject
-                        let audioFile: PFFile! = userObject.objectForKey("audioFile") as PFFile
+                        let userObject:PFObject = objects.first as! PFObject
+                        let audioFile: PFFile! = userObject.objectForKey("audioFile") as! PFFile
                         let recordURL: NSURL = NSURL(string: audioFile.url)!
                         let recordData: NSData = NSData(contentsOfURL: recordURL)!
                         var error: NSError?
@@ -611,7 +611,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
             AVSampleRateKey : 44100.0
         ]
         var error: NSError?
-        self.recorder = AVAudioRecorder(URL: soundFileURL!, settings: recordSettings, error: &error)
+        self.recorder = AVAudioRecorder(URL: soundFileURL!, settings: recordSettings as [NSObject : AnyObject], error: &error)
         if let e = error {
             println(e.localizedDescription)
         } else {
@@ -670,10 +670,10 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     
     func deleteAllRecordings() {
         var docsDir =
-        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
         var fileManager = NSFileManager.defaultManager()
         var error: NSError?
-        var files = fileManager.contentsOfDirectoryAtPath(docsDir, error: &error) as [String]
+        var files = fileManager.contentsOfDirectoryAtPath(docsDir, error: &error) as! [String]
         if let e = error {
             println(e.localizedDescription)
         }
@@ -706,7 +706,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
     func uploadAudioTrack() {
         var fileManager = NSFileManager.defaultManager()
         var docsDir =
-        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
         let fileExist = fileManager.fileExistsAtPath(docsDir + "/" + self.currentFileName!)
         if fileExist && self.uploadFlag {
             // upload file
@@ -725,7 +725,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                         // not exist in server
                         userAudio = PFObject(className:"soundtracks")
                     } else {
-                        userAudio = objects.first as PFObject
+                        userAudio = objects.first as! PFObject
                     }
                     
                     userAudio["audioName"] = "username-\(self.currentFileName!)"
@@ -738,7 +738,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
                     var error:NSError
                     var succeeded:Bool!
                     userAudio.saveInBackgroundWithBlock({
-                        (succeeded: Bool!, error: NSError!) -> Void in
+                        (succeeded: Bool, error: NSError!) -> Void in
                         if succeeded == true {
                             println("upload successfully")
                             // delete all files in delete list
@@ -818,11 +818,11 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         let queryAudio = PFQuery(className: "soundtracks")
         queryAudio.whereKey("audioName", equalTo:audioName)
         var error: NSError?
-        let userAudioObjects: [PFObject] = queryAudio.findObjects(&error) as [PFObject]
+        let userAudioObjects: [PFObject] = queryAudio.findObjects(&error) as! [PFObject]
         var pageLength: String
         if userAudioObjects.count != 0 {
             let userAudioObject: PFObject = userAudioObjects.first!
-            pageLength = userAudioObject.objectForKey("audioLength") as String
+            pageLength = userAudioObject.objectForKey("audioLength") as! String
         } else {
             pageLength = "00:00"
         }
@@ -834,7 +834,7 @@ class RecordItemViewController: UIViewController, UITableViewDataSource, UITable
         let queryAudio = PFQuery(className: "soundtracks")
         queryAudio.whereKey("audioName", equalTo:audioName)
         var error: NSError
-        let userAudioObjects: [PFObject] = queryAudio.findObjects() as [PFObject]
+        let userAudioObjects: [PFObject] = queryAudio.findObjects() as! [PFObject]
         var pageLength: String
         if userAudioObjects.count != 0 {
             for userAudioObject in userAudioObjects {

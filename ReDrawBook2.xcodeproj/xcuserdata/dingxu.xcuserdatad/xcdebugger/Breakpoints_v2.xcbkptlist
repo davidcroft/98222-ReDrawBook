@@ -24,6 +24,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.AlbumInfo.albumsWithJSON (ReDrawBook2.AlbumInfo.Type)(ObjectiveC.NSArray) -&gt; Swift.Array&lt;ReDrawBook2.AlbumInfo&gt;"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Courses/F14-Intro-to-IOS%20Development/Final/ReDrawBook2/ReDrawBook2/AlbumInfo.swift"
                   timestampString = "434956234.535471"
                   startingColumnNumber = "9223372036854775807"
@@ -38,6 +39,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.AlbumInfo.(albumsWithJSON (ReDrawBook2.AlbumInfo.Type) -&gt; (ObjectiveC.NSArray) -&gt; Swift.Array&lt;ReDrawBook2.AlbumInfo&gt;).(implicit closure #1)"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Courses/F14-Intro-to-IOS%20Development/Final/ReDrawBook2/ReDrawBook2/AlbumInfo.swift"
                   timestampString = "434956234.535716"
                   startingColumnNumber = "9223372036854775807"
@@ -134,6 +136,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.viewDidLoad (ReDrawBook2.RecordItemViewController)() -&gt; ()"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438668396.856951"
                   startingColumnNumber = "9223372036854775807"
@@ -148,6 +151,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "reabstraction thunk helper from @callee_owned () -&gt; (@unowned ()) to @callee_unowned @objc_block () -&gt; (@unowned ())"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438668396.857162"
                   startingColumnNumber = "9223372036854775807"
@@ -180,6 +184,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.(tableView (ReDrawBook2.RecordItemViewController) -&gt; (ObjectiveC.UITableView, didSelectRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ()).(closure #2)"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438669370.619204"
                   startingColumnNumber = "9223372036854775807"
@@ -194,6 +199,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.(tableView (ReDrawBook2.RecordItemViewController) -&gt; (ObjectiveC.UITableView, didSelectRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ()).(closure #2)"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438669370.619381"
                   startingColumnNumber = "9223372036854775807"
@@ -258,6 +264,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.tableView (ReDrawBook2.RecordItemViewController)(ObjectiveC.UITableView, didSelectRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ()"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438760267.460662"
                   startingColumnNumber = "9223372036854775807"
@@ -272,6 +279,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.tableView (ReDrawBook2.RecordItemViewController)(ObjectiveC.UITableView, didSelectRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ()"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438760267.460774"
                   startingColumnNumber = "9223372036854775807"
@@ -375,8 +383,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "368"
             endingLineNumber = "368"
-            landmarkName = "playAudioOnServerFromIndex(_:)"
-            landmarkType = "5">
+            landmarkName = "PlayItemViewController"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -464,8 +472,9 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.uploadAudioTrack (ReDrawBook2.RecordItemViewController)() -&gt; ()"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
-                  timestampString = "439703950.748576"
+                  timestampString = "439803796.240696"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "711"
@@ -478,8 +487,9 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.uploadAudioTrack (ReDrawBook2.RecordItemViewController)() -&gt; ()"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
-                  timestampString = "439703950.74877"
+                  timestampString = "439803796.240856"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "711"
@@ -846,6 +856,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.tableView (ReDrawBook2.RecordItemViewController)(ObjectiveC.UITableView, cellForRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ObjectiveC.UITableViewCell"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438994931.307508"
                   startingColumnNumber = "9223372036854775807"
@@ -860,6 +871,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.RecordItemViewController.tableView (ReDrawBook2.RecordItemViewController)(ObjectiveC.UITableView, cellForRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ObjectiveC.UITableViewCell"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/RecordItemViewController.swift"
                   timestampString = "438994931.307642"
                   startingColumnNumber = "9223372036854775807"
@@ -1027,8 +1039,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "169"
             endingLineNumber = "169"
-            landmarkName = "centralManager(_:didConnectPeripheral:)"
-            landmarkType = "5">
+            landmarkName = "PlayItemViewController"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1132,6 +1144,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.PlayUITableViewController.tableView (ReDrawBook2.PlayUITableViewController)(ObjectiveC.UITableView, cellForRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ObjectiveC.UITableViewCell"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/PlayUITableViewController.swift"
                   timestampString = "439166376.65151"
                   startingColumnNumber = "9223372036854775807"
@@ -1146,6 +1159,7 @@
                   continueAfterRunningActions = "No"
                   symbolName = "ReDrawBook2.PlayUITableViewController.tableView (ReDrawBook2.PlayUITableViewController)(ObjectiveC.UITableView, cellForRowAtIndexPath : ObjectiveC.NSIndexPath) -&gt; ObjectiveC.UITableViewCell"
                   moduleName = "ReDrawBook2"
+                  usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/dingxu/CMU/Thesis/Projects/RecBook/codes/iphone/ReDrawBook2/ReDrawBook2/PlayUITableViewController.swift"
                   timestampString = "439166376.651691"
                   startingColumnNumber = "9223372036854775807"
@@ -1185,6 +1199,54 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "64"
             endingLineNumber = "64"
+            landmarkName = "tableView(_:cellForRowAtIndexPath:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ReDrawBook2/PlayUITableViewController.swift"
+            timestampString = "439803652.370095"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
+            landmarkName = "tableView(_:cellForRowAtIndexPath:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ReDrawBook2/PlayUITableViewController.swift"
+            timestampString = "439803785.107128"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "46"
+            endingLineNumber = "46"
+            landmarkName = "tableView(_:cellForRowAtIndexPath:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ReDrawBook2/PlayUITableViewController.swift"
+            timestampString = "439803795.354884"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "48"
+            endingLineNumber = "48"
             landmarkName = "tableView(_:cellForRowAtIndexPath:)"
             landmarkType = "5">
          </BreakpointContent>

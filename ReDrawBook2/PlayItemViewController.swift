@@ -10,6 +10,7 @@ import UIKit
 import CoreBluetooth
 import AVFoundation
 
+
 class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, AVAudioPlayerDelegate {
     
     @IBOutlet var PlayItemPageStatus: UILabel!
@@ -88,7 +89,7 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
             let imgURL: NSURL = NSURL(string: urlString)!
             // Download an NSData representation of the image at the URL
             let imgData: NSData = NSData(contentsOfURL: imgURL)!*/
-            self.PlayItemPageImg.image = self.bookInfo.coverImage?
+            self.PlayItemPageImg.image = self.bookInfo.coverImage
         }
         
     }
@@ -118,7 +119,7 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
                 // disconnect all peripehrals
                 for connectedPeripheral in connectedPeripherals {
                     NSLog("Already connected ...")
-                    centralManager.cancelPeripheralConnection(connectedPeripheral as CBPeripheral)
+                    centralManager.cancelPeripheralConnection(connectedPeripheral as! CBPeripheral)
                 }
                 // scanning for desired one
                 centralManager.scanForPeripheralsWithServices([self.serviceUUID!], options: [CBCentralManagerScanOptionAllowDuplicatesKey:false])
@@ -149,7 +150,7 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
 
     // Invoked when the central manager discovers a peripheral while scanning
     func centralManager(central: CBCentralManager!, didDiscoverPeripheral peripheral: CBPeripheral!, advertisementData: [NSObject : AnyObject]!, RSSI: NSNumber!) {
-        var periName:NSString! = peripheral!.valueForKey("name") as NSString
+        var periName:NSString! = peripheral!.valueForKey("name") as! NSString
         if (periName == self.BLEName) {
             // Clear off any pending connections
             centralManager.stopScan()
@@ -174,7 +175,7 @@ class PlayItemViewController: UIViewController, CBCentralManagerDelegate, CBPeri
     // Invoked when a call to discoverServices: method
     func peripheral(peripheral: CBPeripheral!, didDiscoverServices error: NSError!) {
         if (error == nil) {
-            for s:CBService in peripheral.services as [CBService] {
+            for s:CBService in peripheral.services as! [CBService] {
                 if (s.UUID.UUIDString == serviceUUID.UUIDString) {
                     // service
                     NSLog("Found correct service")

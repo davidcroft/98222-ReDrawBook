@@ -94,6 +94,7 @@
 		6C713B4219ECD25100A4FF6C /* AlbumInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumInfo.swift; sourceTree = "<group>"; };
 		6C713B4419ECD89600A4FF6C /* PlayItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayItemViewController.swift; sourceTree = "<group>"; };
 		6C713B4619ECE5D800A4FF6C /* AlbumTrack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumTrack.swift; sourceTree = "<group>"; };
+		6C9D12B81A70A518007E320B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		6CE8E7F41A21B70D0096AB65 /* BookInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookInfo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -143,6 +144,7 @@
 		6C713B0A19ECB41000A4FF6C = {
 			isa = PBXGroup;
 			children = (
+				6C9D12B81A70A518007E320B /* Accelerate.framework */,
 				6C7032181A2146F60086FC3D /* AudioToolbox.framework */,
 				6C7032191A2146F60086FC3D /* CFNetwork.framework */,
 				6C70321A1A2146F60086FC3D /* CoreGraphics.framework */,
